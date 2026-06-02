@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Entrar - MultiFit</title>
+    <title>Entrar - Corrida Integração</title>
     <link rel="manifest" href="/static/manifest.webmanifest" />
     <meta name="theme-color" content="#050810" />
     <link rel="icon" type="image/png" href="/static/icon-192.png" />
@@ -17,7 +17,7 @@
 <div class="auth-card">
     <div class="auth-brand">
         <img src="/static/logo-icon.png" alt="" class="auth-logo" onerror="this.remove()" />
-        <span>MultiFit</span>
+        <span>Corrida Integração</span>
     </div>
 
     {% if first_access %}
@@ -35,7 +35,7 @@
     </form>
     {% else %}
     <h1 class="auth-title">Entrar</h1>
-    <p class="auth-sub">Bem-vindo de volta ao MultiFit.</p>
+    <p class="auth-sub">Bem-vindo de volta ao Corrida Integração.</p>
     {% if erro %}<div class="auth-error">Usuário ou senha incorretos.</div>{% endif %}
     <form method="post" action="/entrar" class="auth-form">
         <label><span>Usuário</span>

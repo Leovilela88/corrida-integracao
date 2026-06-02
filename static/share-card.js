@@ -1,4 +1,4 @@
-/* MultiFit — gerador de cards de compartilhamento (conquistas e treinos).
+/* Corrida Integração — gerador de cards de compartilhamento (conquistas e treinos).
    Card 9:16 (1080x1920) para Stories, com foto opcional reposicionável,
    modo de fundo transparente e métricas por esporte com ícones. */
 (function () {
@@ -319,7 +319,7 @@
     }
 
     function drawBrand(cx, y) {
-        const txt = 'MultiFit · multifit.app.br';
+        const txt = 'Corrida Integração 2026';
         ctx.font = '600 30px Inter, sans-serif';
         ctx.textAlign = 'left';
         const tw = ctx.measureText(txt).width;
@@ -649,13 +649,13 @@
     function doShare() {
         const name = payload.type === 'badge' ? 'conquista-multifit.png' : 'treino-multifit.png';
         const text = payload.type === 'badge'
-            ? `Desbloqueei a conquista "${payload.title}" no MultiFit! 💪`
-            : `Treino de ${payload.sportLabel} registrado no MultiFit! 💪`;
+            ? `Desbloqueei a conquista "${payload.title}" no Corrida Integração! 💪`
+            : `Treino de ${payload.sportLabel} registrado no Corrida Integração! 💪`;
         let dataUrl;
         try { dataUrl = canvas.toDataURL('image/png'); }
         catch (_) { return; }
         const file = dataUrlToFile(dataUrl, name);
-        const data = { files: [file], title: 'MultiFit', text };
+        const data = { files: [file], title: 'Corrida Integração', text };
         if (navigator.canShare && navigator.canShare(data)) {
             navigator.share(data).catch((err) => {
                 // se o usuário não cancelou, oferece o download como alternativa
@@ -696,7 +696,7 @@
         });
     }
 
-    window.MultiFitShare = { open, bind: bindButtons };
+    window.Corrida IntegraçãoShare = { open, bind: bindButtons };
     document.addEventListener('DOMContentLoaded', () => bindButtons());
     bindButtons();
 })();

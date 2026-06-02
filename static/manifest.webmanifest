@@ -1,13 +1,13 @@
 {
-  "name": "MultiFit",
-  "short_name": "MultiFit",
-  "description": "MultiFit — atividades físicas unificadas: corrida, natação, musculação, trilha e bike",
+  "name": "Corrida Integração",
+  "short_name": "Corrida Integração",
+  "description": "Corrida Integração — atividades físicas unificadas: corrida, natação, musculação, trilha e bike",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#050810",
-  "theme_color": "#050810",
+  "background_color": "#04132f",
+  "theme_color": "#04132f",
   "lang": "pt-BR",
   "icons": [
     {
