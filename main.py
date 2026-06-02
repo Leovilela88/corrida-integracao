@@ -37,7 +37,7 @@ import notifications
 import stats
 import strava_api
 
-SPORTS = ("corrida", "natacao", "musculacao", "trilha", "bike", "outro")
+SPORTS = ("corrida",)
 
 # Fuso do Brasil — o servidor roda em UTC, então datas/horas seguem São Paulo.
 BR_TZ = ZoneInfo("America/Sao_Paulo")

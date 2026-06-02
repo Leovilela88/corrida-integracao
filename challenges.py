@@ -35,20 +35,14 @@ def _c(code, title, sport, metric, target, period, icon, unit):
 # Catálogo de desafios. Semanais e mensais, cobrindo todos os esportes.
 CHALLENGES = [
     # ---- semanais ----
+    _c("run_w_15", "15 km de corrida", "corrida", "distance", 15, "week", "run", "km"),
     _c("run_w_25", "25 km de corrida", "corrida", "distance", 25, "week", "run", "km"),
-    _c("swim_w_3", "3 km de natação", "natacao", "distance", 3, "week", "waves", "km"),
-    _c("bike_w_80", "80 km de bike", "bike", "distance", 80, "week", "route", "km"),
-    _c("trail_w_15", "15 km de trilha", "trilha", "distance", 15, "week", "trending-up", "km"),
-    _c("gym_w_3", "3 treinos de musculação", "musculacao", "count", 3, "week", "dumbbell", "treinos"),
-    _c("all_w_5", "5 treinos na semana", None, "count", 5, "week", "target", "treinos"),
+    _c("run_w_3x", "Correr 3 vezes", "corrida", "count", 3, "week", "target", "corridas"),
     # ---- mensais ----
+    _c("run_m_50", "50 km de corrida", "corrida", "distance", 50, "month", "run", "km"),
     _c("run_m_100", "100 km de corrida", "corrida", "distance", 100, "month", "run", "km"),
-    _c("swim_m_10", "10 km de natação", "natacao", "distance", 10, "month", "waves", "km"),
-    _c("bike_m_300", "300 km de bike", "bike", "distance", 300, "month", "route", "km"),
-    _c("trail_m_50", "50 km de trilha", "trilha", "distance", 50, "month", "trending-up", "km"),
-    _c("gym_m_12", "12 treinos de musculação", "musculacao", "count", 12, "month", "dumbbell", "treinos"),
-    _c("all_m_20", "20 treinos no mês", None, "count", 20, "month", "target", "treinos"),
-    _c("cal_m_15000", "15.000 kcal queimadas", None, "calories", 15000, "month", "flame", "kcal"),
+    _c("run_m_12x", "12 corridas no mês", "corrida", "count", 12, "month", "target", "corridas"),
+    _c("cal_m_10000", "10.000 kcal queimadas", "corrida", "calories", 10000, "month", "flame", "kcal"),
 ]
 
 CHALLENGES_BY_CODE = {c.code: c for c in CHALLENGES}

@@ -26,9 +26,6 @@ BADGES = [
     Badge("run10", "run", "#60a5fa", "Aquecendo", "10 km de corrida acumulados", "run_km", 10),
     Badge("run100", "trophy", "#60a5fa", "Centurião", "100 km de corrida acumulados", "run_km", 100),
     Badge("run500", "trophy", "#fbbf24", "Maratonista de elite", "500 km de corrida acumulados", "run_km", 500),
-    # Natação acumulada
-    Badge("swim10", "waves", "#22d3ee", "Peixe", "10 km nadados", "swim_km", 10),
-    Badge("swim50", "waves", "#06b6d4", "Golfinho", "50 km nadados", "swim_km", 50),
     # Maior corrida única (distância de um treino)
     Badge("long5", "target", "#34d399", "Primeiros 5K", "Uma corrida de 5 km", "max_run", 5),
     Badge("long10", "target", "#60a5fa", "Dez de uma vez", "Uma corrida de 10 km", "max_run", 10),

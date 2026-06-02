@@ -121,7 +121,7 @@
     logo.crossOrigin = 'anonymous';
     let logoReady = false;
     logo.onload = () => { logoReady = true; if (overlay && !overlay.hidden) render(); };
-    logo.src = '/static/logo-icon.png';
+    logo.src = '/static/INTEGRACAO_LOGO.png';
 
     document.fonts && document.fonts.ready.then(() => {
         if (overlay && !overlay.hidden) render();
