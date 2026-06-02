@@ -1,0 +1,714 @@
+{% extends "base.html" %}
+{% from "_macros.html" import bicon %}
+{% block title %}Dashboard - MultiFit{% endblock %}
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-sub">Treinos de <strong>{{ athlete.name }}</strong> · números do período selecionado</p>
+    </div>
+    <div class="streak-pill" title="Dias consecutivos treinando">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+        <span><strong>{{ streak }}</strong> {{ "dia" if streak == 1 else "dias" }} seguidos</span>
+    </div>
+</header>
+
+{% if not has_any_workout and strava_configured %}
+<section class="onboard-card">
+    <div class="onboard-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+    </div>
+    <div class="onboard-body">
+        <h2>Conecte seu Strava</h2>
+        <p>Traga seus treinos automaticamente — corrida, natação, bike, trilha e musculação. Conecte uma vez e os treinos novos entram sozinhos.</p>
+        {% if strava_connected %}
+        <a href="/importar" class="btn-strava">Importar do Strava</a>
+        {% else %}
+        <a href="/strava/conectar" class="btn-strava">Conectar com o Strava</a>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+
+<section class="onboard-card install-banner" id="install-banner" hidden>
+    <button class="banner-close" id="install-dismiss" aria-label="Dispensar">&times;</button>
+    <div class="onboard-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+    </div>
+    <div class="onboard-body">
+        <h2>Use como app no celular</h2>
+        <p>Adicione o MultiFit à tela inicial e abra em tela cheia, como um app de verdade.</p>
+        <a href="/instalar" class="btn-primary">Ver como instalar</a>
+    </div>
+</section>
+
+<script>
+    (function () {
+        const banner = document.getElementById('install-banner');
+        if (!banner) return;
+        const standalone = window.matchMedia('(display-mode: standalone)').matches
+            || window.navigator.standalone === true;
+        if (standalone || localStorage.getItem('install-dismissed')) return;
+        banner.hidden = false;
+        const close = document.getElementById('install-dismiss');
+        if (close) close.addEventListener('click', () => {
+            banner.hidden = true;
+            localStorage.setItem('install-dismissed', '1');
+        });
+    })();
+</script>
+
+{% if next_race %}
+<a href="/provas" class="race-banner">
+    <div class="race-banner-count">
+        <span class="race-days">{{ next_race.days }}</span>
+        <span class="race-days-label">{{ 'dia' if next_race.days == 1 else 'dias' }}</span>
+    </div>
+    <div class="race-banner-body">
+        <div class="race-banner-label">Próxima prova</div>
+        <div class="race-banner-name">{{ next_race.r.name }} · {{ next_race.r.date.strftime('%d/%m') }}</div>
+        {% if next_race.pred %}<div class="race-banner-pred">Previsão no seu ritmo: <strong>{{ next_race.pred.time }}</strong></div>{% endif %}
+    </div>
+</a>
+{% endif %}
+
+{% if insights %}
+<section class="insights">
+    {% for ins in insights %}
+    <div class="insight">
+        <span class="insight-ico" style="color: {{ ins.color }}; background: {{ ins.color }}1f;">{{ bicon(ins.icon) }}</span>
+        <span class="insight-text">{{ ins.text }}</span>
+    </div>
+    {% endfor %}
+</section>
+{% endif %}
+
+<div class="range-tabs range-tabs-fit" role="tablist" aria-label="Período dos gráficos">
+    {% for key, label in range_options %}
+    <a href="/?range={{ key }}" class="range-tab {% if range_key == key %}active{% endif %}" role="tab">
+        <span class="rt-long">{{ label }}</span>
+        <span class="rt-short">{{ range_short[key] }}</span>
+    </a>
+    {% endfor %}
+</div>
+
+{% if totals.total_treinos and totals.total_treinos > 0 %}
+<div class="period-share-bar">
+    <button type="button" class="btn-share-cta" data-mf-share='{{ share_period|tojson }}'>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Compartilhar meu resumo
+    </button>
+</div>
+{% endif %}
+
+<section class="cards">
+    <div class="card card-run">
+        <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="m4 22 5-7 4 2 3-5 3 3"/><path d="M13.5 7.5 8 12l-3-1 2.5-5"/><path d="m17 13 3 1"/></svg>
+        </div>
+        <div class="card-label">Corrida</div>
+        <div class="card-value">{{ "%.1f"|format(totals.corrida_km) }}<span> km</span></div>
+    </div>
+    <div class="card card-swim">
+        <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2"/><path d="M2 16c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2"/><circle cx="16" cy="6" r="2"/><path d="M6 14 12 8l2 2"/></svg>
+        </div>
+        <div class="card-label">Natação</div>
+        <div class="card-value">{{ "%.1f"|format(totals.natacao_km) }}<span> km</span></div>
+    </div>
+    <div class="card card-trail">
+        <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>
+        </div>
+        <div class="card-label">Trilha</div>
+        <div class="card-value">{{ "%.1f"|format(totals.trilha_km) }}<span> km</span></div>
+        <div class="card-foot">{{ totals.trilha_sessoes }} {{ "sessão" if totals.trilha_sessoes == 1 else "sessões" }} no período</div>
+    </div>
+    <div class="card card-bike">
+        <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>
+        </div>
+        <div class="card-label">Bike</div>
+        <div class="card-value">{{ "%.1f"|format(totals.bike_km) }}<span> km</span></div>
+        <div class="card-foot">{{ totals.bike_sessoes }} {{ "pedalada" if totals.bike_sessoes == 1 else "pedaladas" }} no período</div>
+    </div>
+    <div class="card card-gym">
+        <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
+        </div>
+        <div class="card-label">Musculação</div>
+        <div class="card-value">{{ totals.musculacao_sessoes }}<span> {{ "sessão" if totals.musculacao_sessoes == 1 else "sessões" }}</span></div>
+        <div class="card-foot">{{ "%.0f"|format(totals.musculacao_min) }} min no período</div>
+    </div>
+    <div class="card card-cal">
+        <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+        </div>
+        <div class="card-label">Calorias queimadas</div>
+        <div class="card-value">{{ "{:,.0f}".format(totals.calorias).replace(',', '.') }}<span> kcal</span></div>
+    </div>
+    <div class="card card-days">
+        <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </div>
+        <div class="card-label">Dias ativos</div>
+        <div class="card-value">{{ totals.dias_ativos }}<span> dias</span></div>
+        <div class="card-foot">{{ totals.total_treinos }} treino{{ 's' if totals.total_treinos != 1 else '' }} no período</div>
+    </div>
+</section>
+
+{# --- Comparativo de período --- #}
+{% macro delta(pct) %}
+    {% if pct is none %}
+        <span class="delta delta-flat">novo</span>
+    {% elif pct > 0 %}
+        <span class="delta delta-up">▲ {{ pct }}%</span>
+    {% elif pct < 0 %}
+        <span class="delta delta-down">▼ {{ pct|abs }}%</span>
+    {% else %}
+        <span class="delta delta-flat">0%</span>
+    {% endif %}
+{% endmacro %}
+
+<section class="compare-grid">
+    {% for key, titulo in [('week', 'Esta semana'), ('month', 'Este mês')] %}
+    {% set c = comparison[key] %}
+    <div class="compare-box">
+        <div class="compare-head">{{ titulo }} <span class="compare-sub">vs {{ 'semana' if key == 'week' else 'mês' }} anterior</span></div>
+        <div class="compare-rows">
+            <div class="compare-row">
+                <span class="compare-metric">{{ "%.1f"|format(c.cur.km) }} km</span>
+                {{ delta(c.pct_km) }}
+            </div>
+            <div class="compare-row">
+                <span class="compare-metric">{{ c.cur.count }} treino{{ 's' if c.cur.count != 1 else '' }}</span>
+                {{ delta(c.pct_count) }}
+            </div>
+            <div class="compare-row">
+                <span class="compare-metric">{{ "{:,.0f}".format(c.cur.cal).replace(',', '.') }} kcal</span>
+                {{ delta(c.pct_cal) }}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% if pace_run or pace_swim %}
+    <div class="compare-box">
+        <div class="compare-head">Evolução do ritmo <span class="compare-sub">mês vs anterior</span></div>
+        <div class="compare-rows">
+            {% if pace_run %}
+            <div class="compare-row">
+                <span class="compare-metric"><span class="record-ico" style="color:#60a5fa">{{ bicon('run') }}</span> {{ pace_run.cur }}</span>
+                {% if pace_run.faster %}<span class="delta delta-up">▲ {{ pace_run.pct|abs }}% + rápido</span>
+                {% elif pace_run.pct > 0 %}<span class="delta delta-down">▼ {{ pace_run.pct }}% + lento</span>
+                {% else %}<span class="delta delta-flat">igual</span>{% endif %}
+            </div>
+            {% endif %}
+            {% if pace_swim %}
+            <div class="compare-row">
+                <span class="compare-metric"><span class="record-ico" style="color:#22d3ee">{{ bicon('waves') }}</span> {{ pace_swim.cur }}</span>
+                {% if pace_swim.faster %}<span class="delta delta-up">▲ {{ pace_swim.pct|abs }}% + rápido</span>
+                {% elif pace_swim.pct > 0 %}<span class="delta delta-down">▼ {{ pace_swim.pct }}% + lento</span>
+                {% else %}<span class="delta delta-flat">igual</span>{% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+{# --- Metas --- #}
+<section class="panel-section">
+    <div class="section-head">
+        <h2>Metas</h2>
+        <a class="section-link" href="/metas">gerenciar →</a>
+    </div>
+    {% if goals_progress %}
+    <div class="goals-mini">
+        {% for p in goals_progress %}
+        <div class="goal-mini {% if p.done %}goal-done{% endif %}">
+            <div class="goal-mini-top">
+                <span>{{ p.metric_label }}{% if p.goal.sport %} · {{ p.scope }}{% endif %} <span class="goal-period">{{ p.period_label }}</span></span>
+                <span class="goal-pct {% if p.done %}is-done{% endif %}">{% if p.done %}<span class="ico-inline">{{ bicon('check') }}</span>{% else %}{{ p.pct }}%{% endif %}</span>
+            </div>
+            <div class="goal-bar"><div class="goal-fill" style="width: {{ p.pct }}%"></div></div>
+            <div class="goal-mini-foot">
+                <span>{{ "%.0f"|format(p.value) if p.goal.metric == 'count' else "%.1f"|format(p.value) }} / {{ "%.0f"|format(p.target) }} {{ p.unit }}</span>
+                {% if not p.done %}
+                <span class="goal-proj {% if p.on_track %}proj-ok{% else %}proj-behind{% endif %}" title="Projeção pelo ritmo atual">
+                    {% if p.on_track %}<span class="ico-inline">{{ bicon('check') }}</span> no ritmo{% else %}projeção {{ "%.0f"|format(p.projected) }}{% endif %}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty">Nenhuma meta definida. <a href="/metas">Criar uma meta</a> → transforma o app em acompanhamento.</p>
+    {% endif %}
+</section>
+
+{# --- Desafios --- #}
+<section class="panel-section">
+    <div class="section-head">
+        <h2>Desafios</h2>
+        <a class="btn-primary btn-small" href="/desafios">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            {% if active_challenges %}Ver desafios{% else %}Aceitar um desafio{% endif %}
+        </a>
+    </div>
+    {% if active_challenges %}
+    <div class="goals-mini">
+        {% for it in active_challenges %}
+        <div class="goal-mini {% if it.done %}goal-done{% endif %}">
+            <div class="goal-mini-top">
+                <span>{{ it.ch.title }} <span class="goal-period">{{ 'no mês' if it.ch.period == 'month' else 'na semana' }}</span></span>
+                <span class="goal-pct {% if it.done %}is-done{% endif %}">{% if it.done %}<span class="ico-inline">{{ bicon('check') }}</span>{% else %}{{ it.pct }}%{% endif %}</span>
+            </div>
+            <div class="goal-bar"><div class="goal-fill" style="width: {{ it.pct }}%;{% if not it.done %} background: {{ it.ch.color }};{% endif %}"></div></div>
+            <div class="goal-mini-foot">
+                <span>{{ it.progress_fmt }} / {{ it.target_fmt }} {{ it.ch.unit }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty">Topa um desafio? Correr 100&nbsp;km no mês, nadar 10&nbsp;km na semana… <a href="/desafios">aceite um</a> e veja a barra encher conforme você treina.</p>
+    {% endif %}
+</section>
+
+{# --- Recordes pessoais --- #}
+<section class="panel-section">
+    <div class="section-head"><h2>Recordes pessoais</h2></div>
+    <div class="records-grid">
+        <div class="record-card">
+            <div class="record-label"><span class="record-ico" style="color:#60a5fa">{{ bicon('route') }}</span> Maior distância</div>
+            {% if records.longest_dist and records.longest_dist.distance_km %}
+            <div class="record-value">{{ "%.2f"|format(records.longest_dist.distance_km) }} km</div>
+            <div class="record-sub">{{ sport_label(records.longest_dist.sport) }} · {{ records.longest_dist.date.strftime('%d/%m/%y') }}</div>
+            {% else %}<div class="record-value">—</div>{% endif %}
+        </div>
+        <div class="record-card">
+            <div class="record-label"><span class="record-ico" style="color:#c084fc">{{ bicon('clock') }}</span> Treino mais longo</div>
+            {% if records.longest_dur and records.longest_dur.duration_min %}
+            <div class="record-value">{{ "%.0f"|format(records.longest_dur.duration_min) }} min</div>
+            <div class="record-sub">{{ sport_label(records.longest_dur.sport) }} · {{ records.longest_dur.date.strftime('%d/%m/%y') }}</div>
+            {% else %}<div class="record-value">—</div>{% endif %}
+        </div>
+        <div class="record-card">
+            <div class="record-label"><span class="record-ico" style="color:#fb923c">{{ bicon('zap') }}</span> Melhor pace corrida</div>
+            {% if records.best_pace.corrida %}
+            <div class="record-value">{{ records.best_pace.corrida.pace }}</div>
+            <div class="record-sub">{{ records.best_pace.corrida.date.strftime('%d/%m/%y') }}</div>
+            {% else %}<div class="record-value">—</div>{% endif %}
+        </div>
+        <div class="record-card">
+            <div class="record-label"><span class="record-ico" style="color:#22d3ee">{{ bicon('waves') }}</span> Melhor pace natação</div>
+            {% if records.best_pace.natacao %}
+            <div class="record-value">{{ records.best_pace.natacao.pace }}</div>
+            <div class="record-sub">{{ records.best_pace.natacao.date.strftime('%d/%m/%y') }}</div>
+            {% else %}<div class="record-value">—</div>{% endif %}
+        </div>
+        <div class="record-card">
+            <div class="record-label"><span class="record-ico" style="color:#f87171">{{ bicon('flame') }}</span> Maior sequência</div>
+            <div class="record-value">{{ records.max_streak }} <span class="record-unit">{{ "dia" if records.max_streak == 1 else "dias" }}</span></div>
+            <div class="record-sub">dias consecutivos</div>
+        </div>
+    </div>
+</section>
+
+{# --- Previsão de prova --- #}
+{% if predictions %}
+<section class="panel-section">
+    <div class="section-head">
+        <h2>Previsão de prova</h2>
+        <span class="section-sub">base: {{ predictions.base_km }} km em {{ predictions.base_time }} ({{ predictions.base_date.strftime('%d/%m') }})</span>
+    </div>
+    <div class="records-grid">
+        {% for p in predictions.preds %}
+        <div class="record-card {% if p.is_base %}pred-base{% endif %}">
+            <div class="record-label"><span class="record-ico" style="color:#60a5fa">{{ bicon('flag') }}</span> {{ p.label }}</div>
+            <div class="record-value">{{ p.time }}</div>
+            <div class="record-sub">{{ p.pace }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    <p class="hint" style="margin: 10px 0 0;">Estimativa pela fórmula de Riegel a partir da sua melhor corrida recente. Quanto mais perto a distância da prova for da sua corrida-base, mais precisa.</p>
+</section>
+{% endif %}
+
+{# --- Conquistas (resumo) --- #}
+<section class="panel-section">
+    <div class="section-head">
+        <h2>Conquistas <span class="badge-count">{{ badges.count }}/{{ badges.total }}</span></h2>
+        <a class="section-link" href="/conquistas">ver todas →</a>
+    </div>
+    <div class="badge-strip">
+        {% for item in badges.unlocked[:8] %}
+        <span class="badge-chip" style="color: {{ item.badge.color }}; background: {{ item.badge.color }}1f; border-color: {{ item.badge.color }}40;" title="{{ item.badge.title }} — {{ item.badge.desc }}">{{ bicon(item.badge.icon) }}</span>
+        {% endfor %}
+        {% for item in badges.locked[:3] %}
+        <span class="badge-chip badge-chip-locked" title="{{ item.badge.title }} — {{ item.badge.desc }} ({{ item.pct }}%)">{{ bicon(item.badge.icon) }}</span>
+        {% endfor %}
+        {% if not badges.unlocked %}
+        <span class="empty">Nenhuma conquista ainda — bora treinar!</span>
+        {% endif %}
+    </div>
+</section>
+
+{# --- Calendário de atividade --- #}
+<section class="panel-section">
+    <div class="section-head">
+        <h2>Calendário de treinos</h2>
+        <span class="section-sub">{{ calendars.active_days }} dias ativos nos últimos {{ calendars.n_months }} meses</span>
+    </div>
+    <div class="cal-grid">
+        {% for month in calendars.months %}
+        <div class="cal-month">
+            <div class="cal-title">{{ month.name }}</div>
+            <div class="cal-weekdays">
+                {% for wd in calendars.weekdays %}<span>{{ wd }}</span>{% endfor %}
+            </div>
+            <div class="cal-days">
+                {% for week in month.weeks %}
+                {% for cell in week %}
+                {% if cell %}
+                {% if cell.count %}
+                <button type="button" class="cal-day cal-l{{ cell.level }} cal-has {% if cell.is_today %}cal-today{% endif %}"
+                        data-date="{{ cell.iso }}"
+                        title="{{ cell.count }} treino{{ 's' if cell.count != 1 else '' }} — toque para ver">{{ cell.day }}</button>
+                {% else %}
+                <span class="cal-day cal-l0 {% if cell.is_today %}cal-today{% endif %} {% if cell.is_future %}cal-future{% endif %}">{{ cell.day }}</span>
+                {% endif %}
+                {% else %}
+                <span class="cal-day cal-blank"></span>
+                {% endif %}
+                {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="cal-legend">
+        <span>Dias coloridos = você treinou. Mais escuro = mais treinos no dia.</span>
+        <span class="cal-legend-scale">
+            <span class="cal-day cal-l0"></span>
+            <span class="cal-day cal-l1"></span>
+            <span class="cal-day cal-l2"></span>
+            <span class="cal-day cal-l3"></span>
+            <span class="cal-day cal-l4"></span>
+        </span>
+    </div>
+</section>
+
+{# Janela com os treinos do dia (aberta ao clicar numa data) #}
+<div class="day-modal" id="day-modal" hidden>
+    <div class="day-modal-box">
+        <button class="modal-close" id="day-close" aria-label="Fechar">&times;</button>
+        <h3 id="day-modal-title">Treinos</h3>
+        <div id="day-modal-list"></div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const dayWorkouts = {{ calendars.day_workouts|tojson }};
+        const modal = document.getElementById('day-modal');
+        const title = document.getElementById('day-modal-title');
+        const list = document.getElementById('day-modal-list');
+        const closeBtn = document.getElementById('day-close');
+        if (!modal) return;
+
+        function fmtDate(iso) {
+            const [y, m, d] = iso.split('-');
+            return `${d}/${m}/${y}`;
+        }
+        function row(w) {
+            const parts = [];
+            if (w.dist != null) parts.push(w.dist.toFixed(2) + ' km');
+            if (w.dur != null) parts.push(w.dur + ' min');
+            if (w.cal != null) parts.push(w.cal + ' kcal');
+            const info = parts.length ? parts.join(' · ') : '—';
+            return `<div class="day-item">
+                <span class="tag ${w.tag}">${w.sport}</span>
+                <span class="day-item-info">${info}</span>
+            </div>`;
+        }
+        function open(iso) {
+            const items = dayWorkouts[iso] || [];
+            title.textContent = 'Treinos de ' + fmtDate(iso);
+            list.innerHTML = items.length
+                ? items.map(row).join('')
+                : '<p class="empty">Sem treinos neste dia.</p>';
+            modal.hidden = false;
+        }
+        function close() { modal.hidden = true; }
+
+        document.querySelectorAll('.cal-day[data-date]').forEach((el) => {
+            el.addEventListener('click', () => open(el.dataset.date));
+        });
+        closeBtn.addEventListener('click', close);
+        modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+    })();
+</script>
+
+<section class="charts-grid">
+    {% set range_label_map = dict(range_options) %}
+    {% set range_label = range_label_map[range_key] %}
+    {% set bucket_label = {'day': 'por dia', 'week': 'por semana', 'month': 'por mês'}[bucket] %}
+    <div class="chart-box">
+        <div class="chart-header">
+            <h2>Dias ativos</h2>
+            <span class="chart-sub">{{ range_label }} · {{ bucket_label }}</span>
+        </div>
+        <canvas id="chartActive"></canvas>
+    </div>
+    <div class="chart-box">
+        <div class="chart-header">
+            <h2>Calorias {{ bucket_label }}</h2>
+            <span class="chart-sub">{{ range_label }}</span>
+        </div>
+        <canvas id="chartCal"></canvas>
+    </div>
+    <div class="chart-box chart-wide">
+        <div class="chart-header">
+            <h2>Evolução {{ {'day': 'diária', 'week': 'semanal', 'month': 'mensal'}[bucket] }}</h2>
+            <span class="chart-sub">km por esporte · {{ range_label }}</span>
+        </div>
+        <canvas id="chartEvo"></canvas>
+    </div>
+    <div class="chart-box">
+        <div class="chart-header">
+            <h2>Distribuição</h2>
+            <span class="chart-sub">Treinos por esporte</span>
+        </div>
+        <canvas id="chartPie"></canvas>
+    </div>
+    <div class="chart-box">
+        <div class="chart-header">
+            <h2>Últimos treinos</h2>
+            <a class="chart-sub chart-link" href="/treinos">ver todos →</a>
+        </div>
+        {% if recent %}
+        <div class="table-wrap">
+            <table class="tbl">
+                <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Esporte</th>
+                    <th>Distância</th>
+                    <th>Duração</th>
+                    <th>Kcal</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for w in recent %}
+                <tr>
+                    <td>{{ w.date.strftime('%d/%m') }}</td>
+                    <td>
+                        {% if w.sport == 'corrida' %}<span class="tag tag-run">Corrida</span>
+                        {% elif w.sport == 'natacao' %}<span class="tag tag-swim">Natação</span>
+                        {% elif w.sport == 'musculacao' %}<span class="tag tag-gym">Musculação</span>
+                        {% elif w.sport == 'trilha' %}<span class="tag tag-trail">Trilha</span>
+                        {% elif w.sport == 'bike' %}<span class="tag tag-bike">Bike</span>
+                        {% else %}<span class="tag tag-other">Outro</span>{% endif %}
+                    </td>
+                    <td>{{ "%.2f"|format(w.distance_km) if w.distance_km else "—" }}</td>
+                    <td>{{ "%.0f'"|format(w.duration_min) if w.duration_min else "—" }}</td>
+                    <td>{{ "%.0f"|format(w.calories) if w.calories else "—" }}</td>
+                    <td class="row-actions">
+                        <a href="/treino/{{ w.id }}/editar" class="btn-icon" title="Editar">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+                        </a>
+                        <form method="post" action="/delete/{{ w.id }}" onsubmit="return confirm('Excluir treino?');">
+                            <button class="btn-icon" type="submit" title="Excluir">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="empty">Nenhum treino ainda. <a href="/novo">Adicione o primeiro</a> →</p>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+    const labels30 = {{ labels|tojson }};
+    const active30 = {{ active_series|tojson }};
+    const cal30 = {{ cal_series|tojson }};
+    const weekLabels = {{ evo_labels|tojson }};
+    const corridaWeek = {{ corrida_evo|tojson }};
+    const natacaoWeek = {{ natacao_evo|tojson }};
+    const trilhaWeek = {{ trilha_evo|tojson }};
+    const bikeWeek = {{ bike_evo|tojson }};
+    const musculacaoWeek = {{ musculacao_evo|tojson }};
+    const breakdown = {{ breakdown|tojson }};
+    const bucket = {{ bucket|tojson }};
+
+    Chart.defaults.font.family = "Inter, -apple-system, BlinkMacSystemFont, sans-serif";
+    Chart.defaults.color = '#94a3b8';
+
+    const gridColor = 'rgba(148,163,184,0.10)';
+    const tickColor = '#94a3b8';
+    const tooltipStyle = {
+        backgroundColor: '#0f172a',
+        titleColor: '#f1f5f9',
+        bodyColor: '#cbd5e1',
+        borderColor: 'rgba(148,163,184,0.2)',
+        borderWidth: 1,
+        padding: 10,
+        cornerRadius: 8,
+        displayColors: true,
+    };
+
+    new Chart(document.getElementById('chartActive'), {
+        type: 'bar',
+        data: {
+            labels: labels30,
+            datasets: [{
+                label: 'Dias ativos',
+                data: active30,
+                backgroundColor: ctx => {
+                    const v = ctx.raw || 0;
+                    if (v === 0) return 'rgba(148,163,184,0.15)';
+                    let intensity = 1;
+                    if (bucket === 'week') intensity = 0.35 + 0.65 * (v / 7);
+                    else if (bucket === 'month') intensity = 0.35 + 0.65 * Math.min(v / 22, 1);
+                    return `rgba(16,185,129,${intensity})`;
+                },
+                borderRadius: 3,
+                barPercentage: 0.85,
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: {display: false},
+                tooltip: {...tooltipStyle, callbacks: {
+                    label: c => {
+                        if (bucket === 'week') return `${c.raw} ${c.raw === 1 ? 'dia ativo' : 'dias ativos'} na semana`;
+                        if (bucket === 'month') return `${c.raw} ${c.raw === 1 ? 'dia ativo' : 'dias ativos'} no mês`;
+                        return c.raw === 1 ? 'Treinou' : 'Sem treino';
+                    }
+                }}
+            },
+            scales: {
+                y: bucket === 'week'
+                    ? {beginAtZero: true, max: 7, ticks: {color: tickColor, stepSize: 1, font: {size: 11}}, grid: {color: gridColor}}
+                    : bucket === 'month'
+                    ? {beginAtZero: true, ticks: {color: tickColor, stepSize: 5, font: {size: 11}}, grid: {color: gridColor}}
+                    : {display: false, min: 0, max: 1},
+                x: {ticks: {color: tickColor, maxRotation: 0, autoSkip: true, font: {size: 10}}, grid: {display: false}}
+            }
+        }
+    });
+
+    new Chart(document.getElementById('chartCal'), {
+        type: 'line',
+        data: {
+            labels: labels30,
+            datasets: [{
+                data: cal30,
+                borderColor: '#f97316',
+                backgroundColor: 'rgba(249,115,22,0.15)',
+                fill: true, tension: 0.35, borderWidth: 2,
+                pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: '#f97316',
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {legend: {display: false}, tooltip: tooltipStyle},
+            scales: {
+                y: {beginAtZero: true, ticks: {color: tickColor, font: {size: 11}}, grid: {color: gridColor}},
+                x: {ticks: {color: tickColor, maxRotation: 0, autoSkip: true, font: {size: 10}}, grid: {display: false}}
+            }
+        }
+    });
+
+    new Chart(document.getElementById('chartEvo'), {
+        type: 'line',
+        data: {
+            labels: weekLabels,
+            datasets: [
+                {label: 'Corrida (km)', data: corridaWeek, yAxisID: 'y', borderColor: '#3b82f6',
+                 backgroundColor: 'rgba(59,130,246,0.1)', tension: 0.35, borderWidth: 2.5,
+                 pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#3b82f6'},
+                {label: 'Natação (km)', data: natacaoWeek, yAxisID: 'y', borderColor: '#06b6d4',
+                 backgroundColor: 'rgba(6,182,212,0.1)', tension: 0.35, borderWidth: 2.5,
+                 pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#06b6d4'},
+                {label: 'Trilha (km)', data: trilhaWeek, yAxisID: 'y', borderColor: '#84cc16',
+                 backgroundColor: 'rgba(132,204,22,0.1)', tension: 0.35, borderWidth: 2.5,
+                 pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#84cc16'},
+                {label: 'Bike (km)', data: bikeWeek, yAxisID: 'y', borderColor: '#eab308',
+                 backgroundColor: 'rgba(234,179,8,0.1)', tension: 0.35, borderWidth: 2.5,
+                 pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#eab308'},
+                {label: 'Musculação (min)', data: musculacaoWeek, yAxisID: 'y1', borderColor: '#ef4444',
+                 backgroundColor: 'rgba(239,68,68,0.08)', tension: 0.35, borderWidth: 2.5,
+                 borderDash: [4, 3],
+                 pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#ef4444'},
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: {mode: 'index', intersect: false},
+            plugins: {legend: {labels: {color: tickColor, usePointStyle: true, padding: 14}}, tooltip: tooltipStyle},
+            scales: {
+                y: {
+                    type: 'linear', position: 'left', beginAtZero: true,
+                    ticks: {color: tickColor, font: {size: 11}}, grid: {color: gridColor},
+                    title: {display: true, text: 'km', color: tickColor, font: {size: 11}},
+                },
+                y1: {
+                    type: 'linear', position: 'right', beginAtZero: true,
+                    ticks: {color: tickColor, font: {size: 11}}, grid: {drawOnChartArea: false},
+                    title: {display: true, text: 'minutos', color: tickColor, font: {size: 11}},
+                },
+                x: {ticks: {color: tickColor, font: {size: 10}}, grid: {display: false}},
+            }
+        }
+    });
+
+    new Chart(document.getElementById('chartPie'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Corrida', 'Natação', 'Musculação', 'Trilha', 'Bike', 'Outro'],
+            datasets: [{
+                data: [breakdown.corrida, breakdown.natacao, breakdown.musculacao, breakdown.trilha, breakdown.bike, breakdown.outro],
+                backgroundColor: ['#3b82f6', '#06b6d4', '#ef4444', '#84cc16', '#eab308', '#a855f7'],
+                borderColor: '#111a2e', borderWidth: 3,
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '65%',
+            plugins: {
+                legend: {position: 'bottom', labels: {color: tickColor, usePointStyle: true, padding: 12, font: {size: 12}}},
+                tooltip: tooltipStyle,
+            }
+        }
+    });
+
+    // Celebração: confete quando há meta(s) concluída(s), uma vez por dia
+    const doneGoals = {{ goals_progress|selectattr('done')|list|length }};
+    if (doneGoals > 0) {
+        const todayKey = 'celebrated-{{ athlete.id }}-{{ today }}';
+        if (!localStorage.getItem(todayKey)) {
+            localStorage.setItem(todayKey, '1');
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js';
+            s.onload = () => {
+                const burst = (x) => confetti({
+                    particleCount: 80, spread: 70, origin: {x, y: 0.3},
+                    colors: ['#3b82f6', '#10b981', '#f97316', '#a855f7'],
+                });
+                burst(0.3); setTimeout(() => burst(0.7), 250);
+            };
+            document.body.appendChild(s);
+        }
+    }
+</script>
+{% endblock %}

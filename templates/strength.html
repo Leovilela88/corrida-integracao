@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Musculação - MultiFit{% endblock %}
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1 class="page-title">Musculação</h1>
+        <p class="page-sub">Monte seus treinos e acompanhe a evolução das cargas</p>
+    </div>
+</header>
+
+<section class="form" style="max-width: 560px; margin-bottom: 24px;">
+    <h2 class="form-title">Novo treino</h2>
+    <form method="post" action="/rotinas">
+        <div class="row" style="align-items: flex-end;">
+            <label style="flex: 1;">
+                <span>Nome do treino</span>
+                <input type="text" name="name" required maxlength="100" placeholder="ex: Treino A - Peito e tríceps" />
+            </label>
+            <button type="submit" class="btn-primary">Criar e montar</button>
+        </div>
+        <p class="hint">Crie o treino e adicione os exercícios com séries, repetições e carga. Depois é só atualizar as cargas conforme evolui.</p>
+    </form>
+</section>
+
+{% if routines %}
+<section class="routine-grid">
+    {% for item in routines %}
+    <a href="/rotina/{{ item.r.id }}" class="routine-card routine-card-link">
+        <header>
+            <h3>{{ item.r.name }}</h3>
+            <span class="routine-edit-hint">editar →</span>
+        </header>
+        {% if item.exs %}
+        <ul class="routine-items">
+            {% for it in item.exs %}
+            <li>
+                <span class="ri-name">{{ it.name }}</span>
+                <span class="ri-meta">{% if it.sets %}{{ it.sets }}×{{ it.reps or '?' }}{% endif %}{% if it.weight_kg %} · {{ "%.1f"|format(it.weight_kg) }} kg{% endif %}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="empty" style="font-size: 0.88rem;">Sem exercícios ainda — toque para montar.</p>
+        {% endif %}
+    </a>
+    {% endfor %}
+</section>
+{% else %}
+<p class="empty">Você ainda não tem treinos. Crie o primeiro no formulário acima.</p>
+{% endif %}
+{% endblock %}

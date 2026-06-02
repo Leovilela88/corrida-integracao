@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>{% block title %}MultiFit{% endblock %}</title>
+    <link rel="manifest" href="/static/manifest.webmanifest" />
+    <meta name="theme-color" content="#050810" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="MultiFit" />
+    <link rel="icon" type="image/png" href="/static/icon-192.png" />
+    <link rel="apple-touch-icon" href="/static/icon-192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css?v=54" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div id="bg-image" aria-hidden="true"></div>
+<canvas id="plexus" aria-hidden="true"></canvas>
+<nav class="nav">
+    <div class="nav-inner">
+        <a href="/" class="brand">
+            <img src="/static/logo-icon.png" alt="" class="brand-logo" onerror="this.remove()" />
+            <span>MultiFit</span>
+        </a>
+        <div class="nav-right">
+            {% if athlete %}
+            <a href="/notificacoes" class="notif-bell" title="Notificações" aria-label="Notificações">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                <span class="notif-badge" id="notif-badge" hidden>0</span>
+            </a>
+            <details class="athlete-switch">
+                <summary>
+                    {% if athlete.photo_mime %}
+                    <img class="avatar avatar-xs" src="/atletas/{{ athlete.id }}/foto" alt="" />
+                    {% else %}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0 1 14 0v1"/></svg>
+                    {% endif %}
+                    <span class="athlete-name">{{ athlete.name }}</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </summary>
+                <div class="dropdown">
+                    <div class="dropdown-head">
+                        <div class="dropdown-name-lg">{{ athlete.name }}</div>
+                        {% if athlete.friend_code %}<div class="dropdown-code">Seu código: <strong>{{ athlete.friend_code }}</strong></div>{% endif %}
+                    </div>
+                    <a href="/amigos" class="dropdown-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Amigos
+                    </a>
+                    <a href="/atletas" class="dropdown-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0 1 14 0v1"/></svg>
+                        Meu perfil
+                    </a>
+                    {% if athlete.is_admin %}
+                    <a href="/admin" class="dropdown-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        Admin
+                    </a>
+                    {% endif %}
+                    <form method="post" action="/sair">
+                        <button type="submit" class="dropdown-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Sair
+                        </button>
+                    </form>
+                </div>
+            </details>
+            {% endif %}
+            <div class="nav-links">
+                <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}" title="Dashboard">
+                    <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                    <span class="nav-label">Dashboard</span>
+                </a>
+                <a href="/treinos" class="nav-link {% if request.url.path == '/treinos' %}active{% endif %}" title="Treinos">
+                    <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    <span class="nav-label">Treinos</span>
+                </a>
+                <a href="/metas" class="nav-link {% if request.url.path == '/metas' %}active{% endif %}" title="Metas">
+                    <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                    <span class="nav-label">Metas</span>
+                </a>
+                <a href="/conquistas" class="nav-link {% if request.url.path == '/conquistas' %}active{% endif %}" title="Conquistas">
+                    <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 5h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                    <span class="nav-label">Conquistas</span>
+                </a>
+                <a href="/ranking" class="nav-link {% if request.url.path == '/ranking' %}active{% endif %}" title="Ranking">
+                    <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <span class="nav-label">Ranking</span>
+                </a>
+                <a href="/peso" class="nav-link {% if request.url.path == '/peso' %}active{% endif %}" title="Peso">
+                    <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 7a5 5 0 0 0-5 5"/><path d="m12 12 3-2"/></svg>
+                    <span class="nav-label">Peso</span>
+                </a>
+                <a href="/atletas" class="nav-link {% if request.url.path == '/atletas' %}active{% endif %}" title="Atletas">
+                    <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0 1 14 0v1"/></svg>
+                    <span class="nav-label">Atletas</span>
+                </a>
+                <a href="/musculacao" class="nav-link {% if request.url.path == '/musculacao' %}active{% endif %}" title="Musculação">
+                    <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
+                    <span class="nav-label">Musculação</span>
+                </a>
+                <a href="/importar/garmin" class="nav-link {% if request.url.path == '/importar/garmin' %}active{% endif %}" title="Importar (Garmin)">
+                    <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    <span class="nav-label">Importar</span>
+                </a>
+                <a href="/novo" class="btn-primary" title="Novo treino">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    <span class="nav-label">Novo treino</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+{# Barra de navegação inferior (somente celular): 3 + FAB + 3 #}
+<nav class="bottomnav">
+    <a href="/" class="bn-item {% if request.url.path == '/' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        <span>Início</span>
+    </a>
+    <a href="/treinos" class="bn-item {% if request.url.path == '/treinos' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <span>Treinos</span>
+    </a>
+    <a href="/metas" class="bn-item {% if request.url.path == '/metas' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <span>Metas</span>
+    </a>
+    <button type="button" class="bn-fab" id="add-btn" aria-label="Adicionar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+    <a href="/conquistas" class="bn-item {% if request.url.path == '/conquistas' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 5h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        <span>Troféus</span>
+    </a>
+    <a href="/musculacao" class="bn-item {% if request.url.path == '/musculacao' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
+        <span>Musc.</span>
+    </a>
+    <button class="bn-item" id="more-btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+        <span>Mais</span>
+    </button>
+</nav>
+
+{# Menu "Mais" (bottom sheet) #}
+<div class="sheet-overlay" id="more-sheet" hidden>
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <a href="/desafios" class="sheet-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            Desafios
+        </a>
+        <a href="/amigos" class="sheet-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Amigos
+        </a>
+        <a href="/ranking" class="sheet-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Ranking
+        </a>
+        <a href="/provas" class="sheet-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
+            Próximas provas
+        </a>
+        <a href="/peso" class="sheet-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 7a5 5 0 0 0-5 5"/><path d="m12 12 3-2"/></svg>
+            Peso
+        </a>
+        <a href="/atletas" class="sheet-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0 1 14 0v1"/></svg>
+            Meu perfil
+        </a>
+        <a href="/importar" class="sheet-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Conectar Strava
+        </a>
+        <a href="/importar/garmin" class="sheet-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Importar (Garmin)
+        </a>
+        <a href="/instalar" class="sheet-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+            Instalar como app
+        </a>
+    </div>
+</div>
+
+{# Menu de ações do botão "+" #}
+<div class="sheet-overlay" id="add-sheet" hidden>
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <a href="/novo" class="sheet-item sheet-item-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            Novo treino
+        </a>
+        <a href="/musculacao" class="sheet-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
+            Musculação
+        </a>
+        <a href="/metas" class="sheet-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            Nova meta
+        </a>
+    </div>
+</div>
+<main class="container">
+    {% block content %}{% endblock %}
+</main>
+
+<script>
+    // Service worker (PWA): app abre rápido e mostra tela amigável sem conexão.
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+    }
+    // Sheets da barra inferior (botão "Mais" e botão "+")
+    (function () {
+        function bind(btnId, sheetId) {
+            const btn = document.getElementById(btnId);
+            const sheet = document.getElementById(sheetId);
+            if (!btn || !sheet) return;
+            btn.addEventListener('click', () => { sheet.hidden = false; });
+            sheet.addEventListener('click', (e) => { if (e.target === sheet) sheet.hidden = true; });
+        }
+        bind('more-btn', 'more-sheet');
+        bind('add-btn', 'add-sheet');
+    })();
+
+    // Fundo plexus neon — sutil e leve (pausa quando a aba não está visível)
+    (function () {
+        const canvas = document.getElementById('plexus');
+        if (!canvas) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const ctx = canvas.getContext('2d');
+        let w, h, pts, raf, running = false;
+        const COUNT = 42, MAXD = 150;
+
+        function resize() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        }
+        function init() {
+            pts = Array.from({ length: COUNT }, () => ({
+                x: Math.random() * w, y: Math.random() * h,
+                vx: (Math.random() - 0.5) * 0.28, vy: (Math.random() - 0.5) * 0.28,
+            }));
+        }
+        function frame() {
+            ctx.clearRect(0, 0, w, h);
+            for (const p of pts) {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0 || p.x > w) p.vx *= -1;
+                if (p.y < 0 || p.y > h) p.vy *= -1;
+            }
+            for (let i = 0; i < pts.length; i++) {
+                for (let j = i + 1; j < pts.length; j++) {
+                    const a = pts[i], b = pts[j];
+                    const dx = a.x - b.x, dy = a.y - b.y;
+                    const d = Math.hypot(dx, dy);
+                    if (d < MAXD) {
+                        ctx.strokeStyle = 'rgba(59,130,246,' + (1 - d / MAXD) * 0.16 + ')';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+                    }
+                }
+            }
+            for (const p of pts) {
+                ctx.fillStyle = 'rgba(96,165,250,0.45)';
+                ctx.beginPath(); ctx.arc(p.x, p.y, 1.4, 0, Math.PI * 2); ctx.fill();
+            }
+            raf = requestAnimationFrame(frame);
+        }
+        function start() { if (!running) { running = true; frame(); } }
+        function stop() { running = false; cancelAnimationFrame(raf); }
+
+        resize(); init(); start();
+        window.addEventListener('resize', () => { resize(); init(); });
+        document.addEventListener('visibilitychange', () => {
+            document.hidden ? stop() : start();
+        });
+    })();
+</script>
+<script>
+    // Badge de notificações não lidas no sininho.
+    (function () {
+        const badge = document.getElementById('notif-badge');
+        if (!badge) return;
+        fetch('/api/notif-count').then(r => r.json()).then(j => {
+            if (j && j.unread > 0) {
+                badge.textContent = j.unread > 9 ? '9+' : j.unread;
+                badge.hidden = false;
+            }
+        }).catch(() => {});
+    })();
+</script>
+<script>window.MF_ATHLETE = {{ (athlete.name if athlete else "")|tojson }};</script>
+<script src="/static/share-card.js?v=7" defer></script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}Treino - MultiFit{% endblock %}
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1 class="page-title">{{ sport_label(w.sport) }} · {{ w.date.strftime('%d/%m/%Y') }}</h1>
+        <p class="page-sub">Detalhe do treino de <strong>{{ athlete.name }}</strong></p>
+    </div>
+    <div class="header-actions">
+        {% if share_data.metrics %}
+        <button type="button" class="btn-share-cta" data-mf-share='{{ share_data|tojson }}'>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Compartilhar
+        </button>
+        {% endif %}
+        <a href="/treino/{{ w.id }}/editar" class="btn-ghost btn-small">Editar treino</a>
+    </div>
+</header>
+
+<section class="cards" style="margin-bottom: 24px;">
+    {% if w.distance_km %}
+    <div class="card"><div class="card-label">Distância</div><div class="card-value">{{ "%.2f"|format(w.distance_km) }}<span> km</span></div></div>
+    {% endif %}
+    {% if w.duration_min %}
+    <div class="card"><div class="card-label">Duração</div><div class="card-value">{{ "%.0f"|format(w.duration_min) }}<span> min</span></div></div>
+    {% endif %}
+    {% if pace %}
+    <div class="card"><div class="card-label">Ritmo</div><div class="card-value">{{ pace }}</div></div>
+    {% endif %}
+    {% if w.calories %}
+    <div class="card"><div class="card-label">Calorias</div><div class="card-value">{{ "%.0f"|format(w.calories) }}<span> kcal</span></div></div>
+    {% endif %}
+    {% if w.sport == 'musculacao' and volume %}
+    <div class="card"><div class="card-label">Volume total</div><div class="card-value">{{ "{:,.0f}".format(volume).replace(',', '.') }}<span> kg</span></div></div>
+    {% endif %}
+    {% for m in extra_metrics_list(extra) %}
+    <div class="card"><div class="card-label">{{ m.label }}</div><div class="card-value">{{ m.value }}</div></div>
+    {% endfor %}
+</section>
+
+{% if w.notes %}
+<p class="hint" style="margin-bottom: 24px;">{{ w.notes }}</p>
+{% endif %}
+
+{% if w.route_polyline %}
+<section class="panel-section">
+    <div class="section-head"><h2>Rota</h2></div>
+    <div id="route-map" class="route-map"></div>
+    <p class="hint" style="margin-top:8px;">Traçado importado do Strava.</p>
+</section>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    (function () {
+        function decodePolyline(str) {
+            let pts = [], i = 0, lat = 0, lng = 0;
+            while (i < str.length) {
+                let b, shift = 0, result = 0;
+                do { b = str.charCodeAt(i++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+                lat += (result & 1) ? ~(result >> 1) : (result >> 1);
+                shift = 0; result = 0;
+                do { b = str.charCodeAt(i++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+                lng += (result & 1) ? ~(result >> 1) : (result >> 1);
+                pts.push([lat / 1e5, lng / 1e5]);
+            }
+            return pts;
+        }
+        function init() {
+            if (typeof L === 'undefined') { setTimeout(init, 150); return; }
+            const pts = decodePolyline({{ w.route_polyline|tojson }});
+            if (!pts.length) return;
+            const map = L.map('route-map', { scrollWheelZoom: false, attributionControl: true });
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap, &copy; CARTO · Powered by Strava', maxZoom: 19,
+            }).addTo(map);
+            const line = L.polyline(pts, { color: '#60a5fa', weight: 4, opacity: 0.95 }).addTo(map);
+            L.circleMarker(pts[0], { radius: 5, color: '#22c55e', fillColor: '#22c55e', fillOpacity: 1 }).addTo(map);
+            L.circleMarker(pts[pts.length - 1], { radius: 5, color: '#ef4444', fillColor: '#ef4444', fillOpacity: 1 }).addTo(map);
+            map.fitBounds(line.getBounds(), { padding: [24, 24] });
+            setTimeout(() => map.invalidateSize(), 200);
+        }
+        init();
+    })();
+</script>
+{% endif %}
+
+{% if w.sport == 'musculacao' %}
+<section class="routine-bar">
+    {% if routines %}
+    <form method="post" action="/treino/{{ w.id }}/carregar-rotina" class="routine-load">
+        <select name="routine_id" required>
+            <option value="" disabled selected>Carregar uma rotina…</option>
+            {% for r in routines %}<option value="{{ r.id }}">{{ r.name }}</option>{% endfor %}
+        </select>
+        <button type="submit" class="btn-ghost btn-small">Carregar</button>
+    </form>
+    {% endif %}
+    {% if exercises %}
+    <form method="post" action="/treino/{{ w.id }}/salvar-rotina" class="routine-save"
+          onsubmit="return !!this.name.value.trim();">
+        <input type="text" name="name" maxlength="100" placeholder="Salvar como rotina (nome)" />
+        <button type="submit" class="btn-ghost btn-small">Salvar rotina</button>
+    </form>
+    {% endif %}
+</section>
+
+<section class="recent" style="margin-bottom: 24px;">
+    <div class="section-head"><h2>Exercícios</h2></div>
+    {% if exercises %}
+    <div class="table-wrap">
+        <table class="tbl">
+            <thead><tr><th>Exercício</th><th>Séries</th><th>Reps</th><th>Carga</th><th>Volume</th><th></th></tr></thead>
+            <tbody>
+            {% for e in exercises %}
+            <tr>
+                <td><strong>{{ e.name }}</strong></td>
+                <td>{{ e.sets if e.sets else "—" }}</td>
+                <td>{{ e.reps if e.reps else "—" }}</td>
+                <td>{{ "%.1f kg"|format(e.weight_kg) if e.weight_kg else "—" }}</td>
+                <td>{{ "{:,.0f} kg".format((e.sets or 0)*(e.reps or 0)*(e.weight_kg or 0)).replace(',', '.') if (e.sets and e.reps and e.weight_kg) else "—" }}</td>
+                <td class="row-actions">
+                    <form method="post" action="/exercicio/{{ e.id }}/delete" onsubmit="return confirm('Remover exercício?');">
+                        <button class="btn-icon" type="submit" title="Remover">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty">Nenhum exercício registrado. Adicione abaixo para montar o treino.</p>
+    {% endif %}
+</section>
+
+<section class="form" style="max-width: 760px;">
+    <h2 class="form-title">Adicionar exercício</h2>
+    <form method="post" action="/treino/{{ w.id }}/exercicio">
+        <label>
+            <span>Exercício</span>
+            <input type="text" name="name" id="ex-name" list="exercise-names" required maxlength="100" placeholder="ex: Supino inclinado" autocomplete="off" />
+            <datalist id="exercise-names">
+                {% for n in exercise_names %}<option value="{{ n }}"></option>{% endfor %}
+            </datalist>
+        </label>
+        <div class="progress-hint" id="progress-hint" hidden></div>
+        <div class="row">
+            <label>
+                <span>Séries</span>
+                <input type="number" step="1" min="1" max="50" name="sets" id="ex-sets" placeholder="ex: 4" />
+            </label>
+            <label>
+                <span>Repetições</span>
+                <input type="number" step="1" min="1" max="200" name="reps" id="ex-reps" placeholder="ex: 10" />
+            </label>
+            <label>
+                <span>Carga (kg)</span>
+                <input type="number" step="0.5" min="0" name="weight_kg" id="ex-weight" placeholder="ex: 40" />
+            </label>
+        </div>
+        <div class="actions">
+            <a href="/treinos" class="btn-ghost">Voltar</a>
+            <button type="submit" class="btn-primary">+ Adicionar exercício</button>
+        </div>
+    </form>
+</section>
+
+<script>
+    (function () {
+        const name = document.getElementById('ex-name');
+        const hint = document.getElementById('progress-hint');
+        const setsEl = document.getElementById('ex-sets');
+        const repsEl = document.getElementById('ex-reps');
+        const wEl = document.getElementById('ex-weight');
+        if (!name) return;
+        let timer = null;
+
+        async function lookup() {
+            const q = name.value.trim();
+            if (q.length < 2) { hint.hidden = true; return; }
+            try {
+                const r = await fetch('/api/exercicio-hist?name=' + encodeURIComponent(q));
+                const j = await r.json();
+                if (!j.items.length) { hint.hidden = true; return; }
+                const last = j.items[0];
+                const parts = [];
+                if (last.sets) parts.push(last.sets + '×' + (last.reps || '?'));
+                if (last.weight) parts.push(last.weight + ' kg');
+                hint.innerHTML = '<strong>Última vez (' + last.date + '):</strong> ' +
+                    (parts.join(' · ') || 'sem dados') +
+                    ' <button type="button" class="hint-fill">usar</button>';
+                hint.hidden = false;
+                const fill = hint.querySelector('.hint-fill');
+                if (fill) fill.addEventListener('click', () => {
+                    if (last.sets) setsEl.value = last.sets;
+                    if (last.reps) repsEl.value = last.reps;
+                    if (last.weight) wEl.value = last.weight;
+                });
+            } catch (_) { hint.hidden = true; }
+        }
+        function debounce() { clearTimeout(timer); timer = setTimeout(lookup, 250); }
+        name.addEventListener('input', debounce);
+        name.addEventListener('change', lookup);
+    })();
+</script>
+{% else %}
+<a href="/treinos" class="btn-ghost">Voltar aos treinos</a>
+{% endif %}
+{% endblock %}

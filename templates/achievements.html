@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "_macros.html" import bicon %}
+{% block title %}Conquistas - MultiFit{% endblock %}
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1 class="page-title">Conquistas</h1>
+        <p class="page-sub"><strong>{{ athlete.name }}</strong> desbloqueou <strong>{{ badges.count }}</strong> de {{ badges.total }}</p>
+    </div>
+    <a href="/desafios" class="btn-primary btn-small">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        Desafios
+    </a>
+</header>
+
+<div class="badge-progress-bar">
+    <div class="badge-progress-fill" style="width: {{ (badges.count / badges.total * 100)|round }}%"></div>
+</div>
+
+{% if badges.unlocked %}
+<section class="panel-section">
+    <div class="section-head"><h2>Desbloqueadas</h2></div>
+    <div class="badge-grid">
+        {% for item in badges.unlocked %}
+        <article class="badge-card badge-unlocked" title="{{ item.badge.desc }}">
+            <div class="badge-icon" style="color: {{ item.badge.color }}; background: {{ item.badge.color }}1f;">{{ bicon(item.badge.icon) }}</div>
+            <div class="badge-title">{{ item.badge.title }}</div>
+            <div class="badge-desc">{{ item.badge.desc }}</div>
+            <button type="button" class="badge-share"
+                    data-mf-share='{{ {"type":"badge","title":item.badge.title,"desc":item.badge.desc,"color":item.badge.color}|tojson }}'>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Compartilhar
+            </button>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% if badges.locked %}
+<section class="panel-section">
+    <div class="section-head"><h2>A conquistar</h2></div>
+    <div class="badge-grid">
+        {% for item in badges.locked %}
+        <article class="badge-card badge-locked" title="{{ item.badge.desc }}">
+            <div class="badge-icon">{{ bicon(item.badge.icon) }}</div>
+            <div class="badge-title">{{ item.badge.title }}</div>
+            <div class="badge-desc">{{ item.badge.desc }}</div>
+            <div class="badge-bar"><div class="badge-fill" style="width: {{ item.pct }}%"></div></div>
+            <div class="badge-pct">{{ item.pct }}%</div>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}

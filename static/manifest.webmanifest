@@ -1,0 +1,26 @@
+{
+  "name": "MultiFit",
+  "short_name": "MultiFit",
+  "description": "MultiFit — atividades físicas unificadas: corrida, natação, musculação, trilha e bike",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050810",
+  "theme_color": "#050810",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

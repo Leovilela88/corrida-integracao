@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Treinos - MultiFit{% endblock %}
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1 class="page-title">Todos os treinos</h1>
+        <p class="page-sub"><strong>{{ total }}</strong> treino{{ 's' if total != 1 else '' }} de <strong>{{ athlete.name }}</strong>{% if sport %} · filtrando {{ sport_label(sport) }}{% endif %}</p>
+    </div>
+    <a href="/novo" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="nav-label">Novo treino</span>
+    </a>
+</header>
+
+<div class="range-tabs" role="tablist" aria-label="Filtrar por esporte">
+    <a href="/treinos" class="range-tab {% if not sport %}active{% endif %}">Todos</a>
+    {% for s in sports %}
+    <a href="/treinos?sport={{ s }}" class="range-tab {% if sport == s %}active{% endif %}">{{ sport_label(s) }}</a>
+    {% endfor %}
+</div>
+
+{% if cleaned_reclass is not none or cleaned_removed is not none %}
+<div class="alert alert-success">
+    <strong>Limpeza concluída.</strong>
+    {{ cleaned_reclass or 0 }} reclassificado{{ 's' if (cleaned_reclass or 0) != 1 else '' }} como Bike ·
+    {{ cleaned_removed or 0 }} removido{{ 's' if (cleaned_removed or 0) != 1 else '' }}.
+</div>
+{% endif %}
+
+{% if sport == 'outro' and total > 0 %}
+<div class="alert alert-error">
+    Limpeza dos treinos "Outro": pedaladas (Ride/Bike) viram <strong>Bike</strong>; o restante é removido.
+    <form method="post" action="/admin/limpar-outro" onsubmit="return confirm('Reclassificar pedaladas como Bike e remover o restante de Outro?');" style="margin-top:10px;">
+        <button type="submit" class="btn-primary btn-small">Limpar treinos "Outro"</button>
+    </form>
+</div>
+{% endif %}
+
+<section class="recent">
+    {% if rows %}
+    <div class="bulk-bar" id="bulk-bar" hidden>
+        <span class="bulk-count"><strong id="bulk-n">0</strong> selecionado(s)</span>
+        <form method="post" action="/treinos/excluir" id="bulk-form"
+              onsubmit="return confirm('Excluir os treinos selecionados? Essa ação não pode ser desfeita.');">
+            <button type="submit" class="btn-danger btn-small">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                Excluir selecionados
+            </button>
+        </form>
+    </div>
+    <div class="table-wrap">
+        <table class="tbl">
+            <thead>
+            <tr>
+                <th class="col-check"><input type="checkbox" id="check-all" title="Selecionar todos" /></th>
+                <th>Data</th>
+                <th>Esporte</th>
+                <th>Distância</th>
+                <th>Duração</th>
+                <th>Ritmo</th>
+                <th>Kcal</th>
+                <th>Notas</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for w in rows %}
+            {% set p = pace(w.sport, w.distance_km, w.duration_min) %}
+            <tr class="row-link" data-href="/treino/{{ w.id }}">
+                <td class="col-check"><input type="checkbox" class="row-check" value="{{ w.id }}" aria-label="Selecionar treino" /></td>
+                <td>{{ w.date.strftime('%d/%m/%y') }}</td>
+                <td>
+                    {% if w.sport == 'corrida' %}<span class="tag tag-run">Corrida</span>
+                    {% elif w.sport == 'natacao' %}<span class="tag tag-swim">Natação</span>
+                    {% elif w.sport == 'musculacao' %}<span class="tag tag-gym">Musculação</span>
+                    {% elif w.sport == 'trilha' %}<span class="tag tag-trail">Trilha</span>
+                    {% elif w.sport == 'bike' %}<span class="tag tag-bike">Bike</span>
+                    {% else %}<span class="tag tag-other">Outro</span>{% endif %}
+                    {% if w.sport == 'musculacao' and ex_counts.get(w.id) %}
+                    <a href="/treino/{{ w.id }}" class="ex-count" title="Ver exercícios">{{ ex_counts[w.id] }} exerc.</a>
+                    {% endif %}
+                </td>
+                <td>{{ "%.2f km"|format(w.distance_km) if w.distance_km else "—" }}</td>
+                <td>{{ "%.0f min"|format(w.duration_min) if w.duration_min else "—" }}</td>
+                <td>{{ p if p else "—" }}</td>
+                <td>{{ "%.0f"|format(w.calories) if w.calories else "—" }}</td>
+                <td class="notes-cell">{{ w.notes or "" }}</td>
+                <td class="row-actions">
+                    <a href="/treino/{{ w.id }}" class="btn-icon" title="Ver detalhe">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </a>
+                    <button type="button" class="btn-share-row" title="Compartilhar"
+                            data-mf-share='{{ workout_share(w.sport, w.distance_km, w.duration_min, w.calories, date_label=w.date.strftime("%d/%m/%Y"), ex_count=ex_counts.get(w.id), polyline=w.route_polyline, extra=(w.extra_json|fromjson))|tojson }}'>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        Compartilhar
+                    </button>
+                    <a href="/treino/{{ w.id }}/editar" class="btn-icon" title="Editar">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+                    </a>
+                    <form method="post" action="/delete/{{ w.id }}" onsubmit="return confirm('Excluir treino?');">
+                        <input type="hidden" name="redirect" value="/treinos" />
+                        <button class="btn-icon" type="submit" title="Excluir">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if pages > 1 %}
+    <div class="pagination">
+        {% set qs = ('&sport=' ~ sport) if sport else '' %}
+        {% if page > 1 %}
+        <a class="btn-ghost btn-small" href="/treinos?page={{ page - 1 }}{{ qs }}">← Anterior</a>
+        {% else %}
+        <span class="btn-ghost btn-small is-disabled">← Anterior</span>
+        {% endif %}
+        <span class="page-info">Página {{ page }} de {{ pages }}</span>
+        {% if page < pages %}
+        <a class="btn-ghost btn-small" href="/treinos?page={{ page + 1 }}{{ qs }}">Próxima →</a>
+        {% else %}
+        <span class="btn-ghost btn-small is-disabled">Próxima →</span>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <p class="empty">Nenhum treino {% if sport %}de {{ sport_label(sport) }} {% endif %}encontrado. <a href="/novo">Adicionar treino</a> →</p>
+    {% endif %}
+</section>
+
+<script>
+    // Clicar em qualquer lugar da linha abre o detalhe do treino — exceto nos
+    // botões de ação, links e nos checkboxes de seleção.
+    document.querySelectorAll('tr.row-link').forEach(function (tr) {
+        tr.addEventListener('click', function (e) {
+            if (e.target.closest('.row-actions, .col-check, a, button, form, input, label')) return;
+            window.location.href = tr.dataset.href;
+        });
+    });
+
+    // Seleção múltipla para exclusão em massa.
+    (function () {
+        const checks = Array.from(document.querySelectorAll('.row-check'));
+        const all = document.getElementById('check-all');
+        const bar = document.getElementById('bulk-bar');
+        const nEl = document.getElementById('bulk-n');
+        const form = document.getElementById('bulk-form');
+        if (!checks.length || !form) return;
+
+        function selected() { return checks.filter(c => c.checked); }
+        function refresh() {
+            const sel = selected();
+            nEl.textContent = sel.length;
+            bar.hidden = sel.length === 0;
+            if (all) {
+                all.checked = sel.length === checks.length;
+                all.indeterminate = sel.length > 0 && sel.length < checks.length;
+            }
+        }
+        checks.forEach(c => c.addEventListener('change', refresh));
+        if (all) all.addEventListener('change', () => {
+            checks.forEach(c => { c.checked = all.checked; });
+            refresh();
+        });
+        // Ao enviar, injeta os ids marcados como inputs ocultos no form.
+        form.addEventListener('submit', function () {
+            form.querySelectorAll('input[name="ids"]').forEach(i => i.remove());
+            selected().forEach(c => {
+                const h = document.createElement('input');
+                h.type = 'hidden'; h.name = 'ids'; h.value = c.value;
+                form.appendChild(h);
+            });
+        });
+        refresh();
+    })();
+</script>
+{% endblock %}

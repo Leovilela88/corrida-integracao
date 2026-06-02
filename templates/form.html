@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ "Editar treino" if workout else "Novo treino" }} - MultiFit{% endblock %}
+{% block content %}
+{% set dist_m = (workout.distance_km * 1000)|round|int if workout and workout.distance_km else '' %}
+<header class="page-header">
+    <div>
+        <h1 class="page-title">{{ "Editar treino" if workout else "Novo treino" }}</h1>
+        <p class="page-sub">{{ "Editando treino de" if workout else "Registrando para" }} <strong>{{ athlete.name }}</strong> · calorias são estimadas automaticamente se o campo ficar vazio.</p>
+    </div>
+</header>
+<form method="post" action="{{ action }}" class="form" id="workout-form">
+    <div class="row">
+        <label>
+            <span>Data</span>
+            <input type="date" name="workout_date" value="{{ workout.date.isoformat() if workout else today }}" required />
+        </label>
+        <label>
+            <span>Esporte</span>
+            <select name="sport" id="f-sport" required>
+                {% for val, lbl in [('corrida','Corrida'), ('natacao','Natação'), ('musculacao','Musculação'), ('trilha','Trilha / Caminhada'), ('bike','Bike / Ciclismo'), ('outro','Outro')] %}
+                <option value="{{ val }}" {% if workout and workout.sport == val %}selected{% endif %}>{{ lbl }}</option>
+                {% endfor %}
+            </select>
+        </label>
+    </div>
+    <div class="row">
+        <label id="f-dist-wrap">
+            <span>Distância (metros)</span>
+            <input type="number" step="1" min="0" name="distance_m" id="f-dist" value="{{ dist_m }}" placeholder="ex: 5200" />
+        </label>
+        <label>
+            <span>Duração (min)</span>
+            <input type="number" step="1" min="0" name="duration_min" id="f-dur" value="{{ workout.duration_min|round|int if workout and workout.duration_min else '' }}" placeholder="ex: 30" />
+        </label>
+        <label>
+            <span>Calorias (kcal) <em>opcional</em></span>
+            <input type="number" step="1" min="0" name="calories" id="f-cal" value="{{ workout.calories|round|int if workout and workout.calories else '' }}" placeholder="auto" />
+        </label>
+    </div>
+    <div class="estimate" id="estimate" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span id="estimate-text">—</span>
+    </div>
+    <label>
+        <span>Notas</span>
+        <textarea name="notes" rows="3" placeholder="Como foi o treino?">{{ workout.notes if workout and workout.notes else '' }}</textarea>
+    </label>
+    <div class="actions">
+        <a href="{{ '/treinos' if workout else '/' }}" class="btn-ghost">Cancelar</a>
+        <button type="submit" class="btn-primary">{{ "Salvar alterações" if workout else "Salvar treino" }}</button>
+    </div>
+    <p class="form-foot">Atleta: <strong>{{ athlete.name }}</strong> · peso <strong>{{ "%.1f"|format(athlete.weight_kg) }} kg</strong> · <a href="/atletas">trocar / editar</a></p>
+</form>
+
+<script>
+    const sport = document.getElementById('f-sport');
+    const dist = document.getElementById('f-dist');
+    const distWrap = document.getElementById('f-dist-wrap');
+    const dur = document.getElementById('f-dur');
+    const cal = document.getElementById('f-cal');
+    const est = document.getElementById('estimate');
+    const estText = document.getElementById('estimate-text');
+
+    function toggleDistance() {
+        // Esportes sem distância: musculação e "outro"
+        const hide = sport.value === 'musculacao' || sport.value === 'outro';
+        distWrap.style.display = hide ? 'none' : '';
+        if (hide) dist.value = '';
+    }
+    sport.addEventListener('change', () => { toggleDistance(); refresh(); });
+    toggleDistance();
+
+    let timer = null;
+    async function refresh() {
+        if (cal.value) { est.hidden = true; return; }
+        if (!dist.value && !dur.value) { est.hidden = true; return; }
+        const params = new URLSearchParams({sport: sport.value});
+        if (dist.value) params.set('distance_m', dist.value);
+        if (dur.value) params.set('duration_min', dur.value);
+        try {
+            const r = await fetch('/api/estimate?' + params);
+            const j = await r.json();
+            if (j.kcal != null) {
+                estText.textContent = `Estimativa: ~${Math.round(j.kcal)} kcal (${j.athlete}, ${j.weight_kg} kg)`;
+                est.hidden = false;
+            } else {
+                est.hidden = true;
+            }
+        } catch (_) { est.hidden = true; }
+    }
+    function debounce() { clearTimeout(timer); timer = setTimeout(refresh, 200); }
+    [sport, dist, dur, cal].forEach(el => el.addEventListener('input', debounce));
+</script>
+{% endblock %}
