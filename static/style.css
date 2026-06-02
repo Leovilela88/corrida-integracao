@@ -2241,6 +2241,21 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
     transition: filter .15s;
 }
 .btn-strava:hover { filter: brightness(1.08); }
+/* Botão principal do Strava (header do dashboard) — destaque com glow */
+.page-header-actions {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.btn-strava-main {
+    padding: 11px 18px;
+    font-size: 14px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(252, 76, 2, 0.35), 0 1px 3px rgba(0,0,0,0.25);
+}
+.btn-strava-main:hover { filter: brightness(1.12); box-shadow: 0 6px 20px rgba(252, 76, 2, 0.5); }
+@media (max-width: 720px) {
+    .page-header-actions { width: 100%; }
+    .btn-strava-main { flex: 1; }
+}
 .strava-status {
     display: flex; align-items: center; justify-content: center; gap: 8px;
     font-weight: 600; color: var(--text); margin-bottom: 4px;
