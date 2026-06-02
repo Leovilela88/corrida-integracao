@@ -1,15 +1,21 @@
 {
   "name": "Corrida Integração",
-  "short_name": "Corrida Integração",
-  "description": "Corrida Integração — atividades físicas unificadas: corrida, natação, musculação, trilha e bike",
+  "short_name": "Integração",
+  "description": "App oficial da Corrida Integração — acompanhe seus treinos de corrida rumo à prova.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#04132f",
-  "theme_color": "#04132f",
+  "background_color": "#010714",
+  "theme_color": "#010714",
   "lang": "pt-BR",
   "icons": [
+    {
+      "src": "/static/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "/static/icon-192.png",
       "sizes": "192x192",

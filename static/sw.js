@@ -1,5 +1,5 @@
-// Service worker do Exercícios (PWA). Bump CACHE para forçar atualização.
-const CACHE = 'exercicios-v2';
+// Service worker do Corrida Integração (PWA). Bump CACHE para forçar atualização.
+const CACHE = 'corrida-integracao-v1';
 const PRECACHE = [
   '/offline',
   '/static/icon.svg',
