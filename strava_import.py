@@ -211,6 +211,9 @@ def parse_strava_csv(content: bytes) -> ImportResult:
             continue
 
         sport = map_sport(cell("type"))
+        if sport != "corrida":
+            # Corrida Integração: ignora qualquer atividade que não seja corrida
+            continue
 
         dist_raw = _to_float(cell("distance"))
         dist_km = _km_from_distance(dist_raw)

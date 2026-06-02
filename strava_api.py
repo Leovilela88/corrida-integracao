@@ -122,8 +122,16 @@ def _extra_metrics(act: dict) -> Optional[dict]:
     return e or None
 
 
+def _is_running(act: dict) -> bool:
+    """Apenas atividades de corrida (Run, TrailRun, VirtualRun) entram no app."""
+    t = (act.get("sport_type") or act.get("type") or "").lower()
+    return "run" in t
+
+
 def _to_workout(act: dict) -> Optional[ParsedWorkout]:
     try:
+        if not _is_running(act):
+            return None
         ds = act.get("start_date_local") or act.get("start_date")
         d = dtparser.parse(ds).date() if ds else None
         if not d:

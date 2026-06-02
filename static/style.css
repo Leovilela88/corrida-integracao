@@ -1,11 +1,11 @@
 :root {
-    --bg: #04132f;
+    --bg: #010714;
     --bg-grad: radial-gradient(1200px 600px at 80% -10%, rgba(28,125,240,0.10), transparent 60%),
                radial-gradient(900px 500px at -10% 0%, rgba(14,95,207,0.08), transparent 60%);
-    /* superfícies translúcidas — deixam o azul da marca aparecer sutilmente */
-    --panel: rgba(7, 18, 42, 0.92);
-    --panel-2: rgba(13, 27, 56, 0.92);
-    --panel-hover: rgba(20, 38, 72, 0.92);
+    /* superfícies translúcidas — ~10% de transparência, deixam o fundo da marca aparecer */
+    --panel: rgba(7, 18, 42, 0.90);
+    --panel-2: rgba(13, 27, 56, 0.90);
+    --panel-hover: rgba(20, 38, 72, 0.90);
     --text: #f1f5f9;
     --text-2: #cbd5e1;
     --muted: #94a3b8;
@@ -44,6 +44,15 @@ body {
     background-position: top center;
     background-repeat: repeat-y;
     z-index: -1;
+    pointer-events: none;
+    filter: brightness(0.55);
+}
+/* Overlay escuro sobre a imagem de fundo (deixa tudo mais escuro de forma uniforme) */
+#bg-image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(1, 7, 20, 0.55);
     pointer-events: none;
 }
 
