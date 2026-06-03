@@ -427,8 +427,7 @@ def race_predictions(db: Session, athlete_id: int, today: date) -> Optional[dict
     d1, t1 = best.distance_km, best.duration_min  # km, minutos
 
     preds = []
-    for label, dist in [("5K", 5.0), ("10K", 10.0),
-                        ("Meia (21K)", 21.0975), ("Maratona (42K)", 42.195)]:
+    for label, dist in [("5K", 5.0), ("10K", 10.0), ("21K", 21.0975)]:
         t2 = t1 * (dist / d1) ** 1.06
         secs_per_km = t2 * 60 / dist
         m, s = divmod(int(round(secs_per_km)), 60)

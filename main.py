@@ -1863,6 +1863,7 @@ def challenges_page(request: Request, db: Session = Depends(get_db)):
     joins = db.query(ChallengeJoin).filter(ChallengeJoin.athlete_id == athlete.id).all()
     joined = {(j.code, j.period_key) for j in joins}
     data = challenges.build(db, athlete.id, today, joined)
+    event_challenges = challenges.build_event(joined)
     # disputas de prova com amigos (acompanhar aqui também)
     dispute_races = (
         db.query(Race).filter(
@@ -1877,6 +1878,7 @@ def challenges_page(request: Request, db: Session = Depends(get_db)):
             "athlete": athlete,
             "weekly": data["weekly"],
             "monthly": data["monthly"],
+            "event_challenges": event_challenges,
             "disputes": disputes,
         },
     )
@@ -1886,7 +1888,7 @@ def challenges_page(request: Request, db: Session = Depends(get_db)):
 def challenge_accept(request: Request, code: str = Form(...),
                      db: Session = Depends(get_db)):
     athlete = get_active_athlete(request, db)
-    ch = challenges.CHALLENGES_BY_CODE.get(code)
+    ch = challenges.ALL_BY_CODE.get(code)
     if ch:
         pk = challenges.period_key(ch.period, today_br())
         exists = db.query(ChallengeJoin).filter(
@@ -1902,7 +1904,7 @@ def challenge_accept(request: Request, code: str = Form(...),
 @app.post("/desafios/{code}/sair")
 def challenge_leave(request: Request, code: str, db: Session = Depends(get_db)):
     athlete = get_active_athlete(request, db)
-    ch = challenges.CHALLENGES_BY_CODE.get(code)
+    ch = challenges.ALL_BY_CODE.get(code)
     if ch:
         pk = challenges.period_key(ch.period, today_br())
         db.query(ChallengeJoin).filter(

@@ -80,6 +80,44 @@
 </section>
 {% endif %}
 
+{% if event_challenges %}
+<section class="panel-section">
+    <div class="section-head">
+        <h2>Corridas especiais</h2>
+        <span class="section-sub">desafios oficiais da prova · medalha especial</span>
+    </div>
+    <div class="challenge-grid">
+        {% for item in event_challenges %}
+        {% set ch = item.ch %}
+        <article class="challenge-card challenge-event {% if item.joined %}is-accepted{% endif %}">
+            <div class="challenge-head">
+                <span class="challenge-icon" style="color: {{ ch.color }}; background: {{ ch.color }}1f;">{{ bicon(ch.icon) }}</span>
+                <div class="challenge-title">
+                    <strong>{{ ch.title }}</strong>
+                    <span class="challenge-sub">desafio da prova</span>
+                </div>
+                {% if item.joined %}<span class="challenge-badge">{{ bicon('check') }} Aceito</span>{% endif %}
+            </div>
+            <p class="challenge-meta">{{ ch.desc }}</p>
+            <ul class="event-legs">
+                {% for leg in ch.legs %}<li>{{ bicon('flag') }} {{ leg }}</li>{% endfor %}
+            </ul>
+            {% if item.joined %}
+            <form method="post" action="/desafios/{{ ch.code }}/sair" class="challenge-action">
+                <button type="submit" class="btn-ghost btn-small">Desistir do desafio</button>
+            </form>
+            {% else %}
+            <form method="post" action="/desafios/aceitar" class="challenge-action">
+                <input type="hidden" name="code" value="{{ ch.code }}" />
+                <button type="submit" class="btn-primary btn-small">Aceitar desafio</button>
+            </form>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
 <section class="panel-section">
     <div class="section-head"><h2>Da semana</h2></div>
     <div class="challenge-grid">

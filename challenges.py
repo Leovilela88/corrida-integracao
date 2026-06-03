@@ -48,11 +48,51 @@ CHALLENGES = [
 CHALLENGES_BY_CODE = {c.code: c for c in CHALLENGES}
 
 
+@dataclass
+class EventChallenge:
+    code: str
+    title: str
+    desc: str
+    legs: list           # ["5K · sábado (26/09)", "10K · domingo (27/09)"]
+    icon: str = "flag"
+    color: str = "#05e0a3"
+    period: str = "event"
+
+
+# Desafios oficiais da prova (corridas especiais) — medalhas especiais.
+# A pessoa aceita/recusa; não têm barra de progresso (é participação na prova).
+EVENT_CHALLENGES = [
+    EventChallenge(
+        "voo_curto", "Voo Curto",
+        "Encare as duas provas e leve a medalha especial do desafio.",
+        ["5K · sábado (26/09)", "10K · domingo (27/09)"],
+    ),
+    EventChallenge(
+        "voo_longo", "Voo Longo",
+        "O desafio completo: a abertura no sábado e a meia no domingo.",
+        ["5K · sábado (26/09)", "21K · domingo (27/09)"],
+    ),
+]
+
+ALL_BY_CODE = {**CHALLENGES_BY_CODE, **{e.code: e for e in EVENT_CHALLENGES}}
+
+
 def period_key(period: str, today: date) -> str:
+    if period == "event":
+        return "integracao-2026"
     if period == "month":
         return today.strftime("%Y-%m")
     iso = today.isocalendar()
     return f"{iso[0]}-W{iso[1]:02d}"
+
+
+def build_event(joined: set) -> list:
+    """Lista os desafios da prova com status de aceito."""
+    pk = period_key("event", date.today())
+    return [
+        {"ch": e, "joined": (e.code, pk) in joined}
+        for e in EVENT_CHALLENGES
+    ]
 
 
 def period_window(period: str, today: date) -> tuple[date, date]:
