@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from "_macros.html" import bicon %}
+{% block title %}Plano de treino - Corrida Integração{% endblock %}
+{% block content %}
+
+<section class="event-hero">
+    <span class="race-hero-tag">Plano de treino</span>
+    <h1 class="event-title">Rumo aos {{ dist }}</h1>
+    <p class="event-sub">12 semanas até a 41ª Corrida Integração</p>
+    <div class="route-tabs" style="margin-top: 4px;">
+        {% for d in distances %}
+        <a href="/plano?dist={{ d }}" class="route-tab {% if d == dist %}is-active{% endif %}">{{ d }}</a>
+        {% endfor %}
+    </div>
+</section>
+
+{# Banner de status #}
+<section class="plan-status">
+    {% if status.phase == 'base' %}
+    <span class="info-ico">{{ bicon('clock') }}</span>
+    <div>
+        <strong>Fase de base</strong>
+        <p>Seu plano de {{ dist }} começa em {{ status.starts_in }} semana{{ 's' if status.starts_in != 1 else '' }}. Até lá, mantenha 3 corridas leves por semana para chegar pronto.</p>
+    </div>
+    {% elif status.phase == 'race' %}
+    <span class="info-ico">{{ bicon('flag') }}</span>
+    <div><strong>É a semana da prova!</strong><p>Confie no trabalho. Bora correr! 🏃</p></div>
+    {% else %}
+    <span class="info-ico">{{ bicon('target') }}</span>
+    <div>
+        <strong>Semana {{ status.current_week }} de 12</strong>
+        <p>Faltam {{ status.weeks_to_race }} semana{{ 's' if status.weeks_to_race != 1 else '' }} para a prova. Foco na semana destacada abaixo.</p>
+    </div>
+    {% endif %}
+</section>
+
+<section class="panel-section">
+    <div class="plan-weeks">
+        {% for w in weeks %}
+        <article class="plan-week {% if status.current_week == w.week %}is-current{% endif %} {% if w.is_taper %}is-taper{% endif %}">
+            <div class="plan-week-head">
+                <div class="plan-week-no">
+                    <span class="pw-label">Semana</span>
+                    <span class="pw-num">{{ w.week }}</span>
+                </div>
+                <div class="plan-week-focus">
+                    <strong>{{ w.focus }}</strong>
+                    <span>longo de {{ w.long_km }} km</span>
+                </div>
+                {% if status.current_week == w.week %}<span class="challenge-badge">{{ bicon('target') }} Atual</span>{% endif %}
+            </div>
+            <ul class="plan-sessions">
+                {% for s in w.sessions %}
+                <li><span class="ps-tag">{{ s.tag }}</span> {{ s.desc }}</li>
+                {% endfor %}
+            </ul>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -36,6 +36,7 @@ import challenges
 import notifications
 import stats
 import strava_api
+import training_plan
 
 SPORTS = ("corrida",)
 
@@ -1862,6 +1863,25 @@ def event_page(request: Request, db: Session = Depends(get_db)):
     athlete = get_active_athlete(request, db)
     return templates.TemplateResponse(
         "event.html", {"request": request, "athlete": athlete}
+    )
+
+
+@app.get("/plano", response_class=HTMLResponse)
+def training_plan_page(request: Request, dist: str = "10K",
+                       db: Session = Depends(get_db)):
+    """Plano de treino até a prova (5K/10K/21K), com a semana atual destacada."""
+    athlete = get_active_athlete(request, db)
+    dist = dist if dist in training_plan.DISTANCES else "10K"
+    race_day = date(2026, 9, 26)
+    weeks = training_plan.build_plan(dist)
+    status = training_plan.plan_status(race_day, today_br())
+    return templates.TemplateResponse(
+        "training_plan.html",
+        {
+            "request": request, "athlete": athlete,
+            "dist": dist, "distances": training_plan.DISTANCES,
+            "weeks": weeks, "status": status,
+        },
     )
 
 
