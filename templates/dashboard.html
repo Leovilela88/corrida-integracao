@@ -8,18 +8,11 @@
         <p class="page-sub">Treinos de <strong>{{ athlete.name }}</strong> · números do período selecionado</p>
     </div>
     <div class="page-header-actions">
-        {% if strava_configured %}
-            {% if strava_connected %}
-            <a href="/importar" class="btn-strava btn-strava-main" title="Sincronizar corridas do Strava">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
-                <span>Importar do Strava</span>
-            </a>
-            {% else %}
-            <a href="/strava/conectar" class="btn-strava btn-strava-main" title="Conectar conta do Strava">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
-                <span>Conectar Strava</span>
-            </a>
-            {% endif %}
+        {% if strava_configured and strava_connected %}
+        <a href="/importar" class="btn-strava btn-strava-main" title="Sincronizar corridas do Strava">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
+            <span>Importar do Strava</span>
+        </a>
         {% endif %}
         <div class="streak-pill" title="Dias consecutivos treinando">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
@@ -28,7 +21,31 @@
     </div>
 </header>
 
-{% if not has_any_workout and strava_configured %}
+{# --- Card oficial da prova: contagem regressiva + inscrição --- #}
+<section class="race-hero" id="race-hero">
+    <div class="race-hero-head">
+        <span class="race-hero-tag">Prova oficial</span>
+        <h2 class="race-hero-title">41ª Corrida Integração</h2>
+        <p class="race-hero-meta">26 e 27 de setembro de 2026 · Campinas · 5K / 10K / 21K</p>
+    </div>
+    <div class="countdown" id="countdown" data-target="2026-09-27T07:00:00-03:00">
+        <div class="cd-unit"><span class="cd-num" data-cd="days">--</span><span class="cd-lab">dias</span></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit"><span class="cd-num" data-cd="hours">--</span><span class="cd-lab">horas</span></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit"><span class="cd-num" data-cd="mins">--</span><span class="cd-lab">min</span></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit"><span class="cd-num" data-cd="secs">--</span><span class="cd-lab">seg</span></div>
+    </div>
+    <div class="race-hero-actions">
+        <a href="https://www.ticketsports.com.br/e/41%C2%AA+CORRIDA+INTEGRA%C3%87%C3%83O+CAMPINAS+-+2026-74224"
+           target="_blank" rel="noopener" class="btn-primary btn-inscricao">Inscreva-se</a>
+        <a href="https://emc.empresaspioneiras.com.br/dbArquivos/ViaEPTV/regulamento_corrida_integracao_2026.pdf"
+           target="_blank" rel="noopener" class="btn-ghost">Regulamento</a>
+    </div>
+</section>
+
+{% if strava_configured and not strava_connected %}
 <section class="onboard-card">
     <div class="onboard-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
@@ -36,11 +53,7 @@
     <div class="onboard-body">
         <h2>Conecte seu Strava</h2>
         <p>Traga suas corridas automaticamente. Conecte uma vez e as atividades novas entram sozinhas.</p>
-        {% if strava_connected %}
-        <a href="/importar" class="btn-strava">Importar do Strava</a>
-        {% else %}
         <a href="/strava/conectar" class="btn-strava">Conectar com o Strava</a>
-        {% endif %}
     </div>
 </section>
 {% endif %}
@@ -58,6 +71,35 @@
 </section>
 
 <script>
+    // Contagem regressiva da prova
+    (function () {
+        const el = document.getElementById('countdown');
+        if (!el) return;
+        const target = new Date(el.dataset.target).getTime();
+        const out = {
+            days: el.querySelector('[data-cd="days"]'),
+            hours: el.querySelector('[data-cd="hours"]'),
+            mins: el.querySelector('[data-cd="mins"]'),
+            secs: el.querySelector('[data-cd="secs"]'),
+        };
+        const pad = (n) => String(n).padStart(2, '0');
+        function tick() {
+            const diff = target - Date.now();
+            if (diff <= 0) {
+                el.innerHTML = '<div class="cd-live">É hoje! Boa prova! 🏃</div>';
+                clearInterval(timer);
+                return;
+            }
+            const s = Math.floor(diff / 1000);
+            out.days.textContent = Math.floor(s / 86400);
+            out.hours.textContent = pad(Math.floor((s % 86400) / 3600));
+            out.mins.textContent = pad(Math.floor((s % 3600) / 60));
+            out.secs.textContent = pad(s % 60);
+        }
+        tick();
+        const timer = setInterval(tick, 1000);
+    })();
+
     (function () {
         const banner = document.getElementById('install-banner');
         if (!banner) return;

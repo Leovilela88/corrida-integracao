@@ -45,14 +45,14 @@ body {
     background-repeat: repeat-y;
     z-index: -1;
     pointer-events: none;
-    filter: brightness(0.55);
+    filter: brightness(0.72);
 }
 /* Overlay escuro sobre a imagem de fundo (deixa tudo mais escuro de forma uniforme) */
 #bg-image::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: rgba(1, 7, 20, 0.55);
+    background: rgba(1, 7, 20, 0.38);
     pointer-events: none;
 }
 
@@ -367,6 +367,68 @@ html, body { overflow-x: hidden; max-width: 100%; }
 .card-foot strong { color: var(--text-2); font-weight: 600; }
 
 /* ---------- Onboarding: importar do Strava ---------- */
+/* ---------- Card oficial da prova (hero + regressiva) ---------- */
+.race-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    border: 1px solid rgba(28,125,240,0.35);
+    background:
+        radial-gradient(900px 320px at 85% -40%, rgba(28,125,240,0.30), transparent 60%),
+        linear-gradient(135deg, rgba(10,42,107,0.92), rgba(4,19,47,0.92));
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+    padding: 26px 24px;
+    margin-bottom: 24px;
+    text-align: center;
+}
+.race-hero-tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #93c5fd;
+    background: rgba(28,125,240,0.18);
+    border: 1px solid rgba(28,125,240,0.35);
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+}
+.race-hero-title { margin: 0 0 4px; font-size: 1.55rem; font-weight: 800; }
+.race-hero-meta { margin: 0 0 18px; color: var(--text-2); font-size: 0.92rem; }
+.countdown {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+.cd-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 64px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 10px 6px;
+}
+.cd-num { font-size: 1.8rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.cd-lab { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 6px; }
+.cd-sep { font-size: 1.6rem; font-weight: 800; color: var(--muted-2); align-self: center; }
+.cd-live { font-size: 1.2rem; font-weight: 800; color: #93c5fd; }
+.race-hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-inscricao { font-weight: 700; padding: 12px 28px; }
+@media (max-width: 560px) {
+    .race-hero-title { font-size: 1.3rem; }
+    .cd-unit { min-width: 0; flex: 1; padding: 8px 2px; }
+    .cd-num { font-size: 1.4rem; }
+    .cd-sep { display: none; }
+    .countdown { gap: 6px; }
+    .race-hero-actions { width: 100%; }
+    .race-hero-actions a { flex: 1; }
+}
+
 .onboard-card {
     display: flex;
     align-items: center;
