@@ -12,6 +12,10 @@
     --muted-2: #64748b;
     --accent: #1c7df0;
     --accent-hover: #0e5fcf;
+    /* Verde de destaque da marca (igual ao site oficial) — usado em botões e regressiva */
+    --green: #05e0a3;
+    --green-hover: #04c490;
+    --on-green: #04132f;
     --danger: #ef4444;
     --border: rgba(148, 163, 184, 0.10);
     --border-strong: rgba(148, 163, 184, 0.20);
@@ -45,14 +49,14 @@ body {
     background-repeat: repeat-y;
     z-index: -1;
     pointer-events: none;
-    filter: brightness(0.72);
+    filter: brightness(0.9);
 }
 /* Overlay escuro sobre a imagem de fundo (deixa tudo mais escuro de forma uniforme) */
 #bg-image::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: rgba(1, 7, 20, 0.38);
+    background: rgba(1, 7, 20, 0.22);
     pointer-events: none;
 }
 
@@ -387,9 +391,9 @@ html, body { overflow-x: hidden; max-width: 100%; }
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #93c5fd;
-    background: rgba(28,125,240,0.18);
-    border: 1px solid rgba(28,125,240,0.35);
+    color: var(--green);
+    background: rgba(5,224,163,0.12);
+    border: 1px solid rgba(5,224,163,0.35);
     padding: 4px 12px;
     border-radius: 999px;
     margin-bottom: 10px;
@@ -413,10 +417,10 @@ html, body { overflow-x: hidden; max-width: 100%; }
     border-radius: 12px;
     padding: 10px 6px;
 }
-.cd-num { font-size: 1.8rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.cd-num { font-size: 1.8rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; color: var(--green); }
 .cd-lab { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 6px; }
 .cd-sep { font-size: 1.6rem; font-weight: 800; color: var(--muted-2); align-self: center; }
-.cd-live { font-size: 1.2rem; font-weight: 800; color: #93c5fd; }
+.cd-live { font-size: 1.2rem; font-weight: 800; color: var(--green); }
 .race-hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .btn-inscricao { font-weight: 700; padding: 12px 28px; }
 @media (max-width: 560px) {
@@ -1733,8 +1737,8 @@ input[type="file"]:hover { border-color: var(--accent); background: var(--panel-
 
 /* ---------- Buttons ---------- */
 .btn-primary {
-    background: var(--accent);
-    color: white;
+    background: var(--green);
+    color: var(--on-green);
     border: none;
     border-radius: 8px;
     padding: 9px 16px;
@@ -1748,7 +1752,7 @@ input[type="file"]:hover { border-color: var(--accent); background: var(--panel-
     gap: 6px;
     transition: background .15s, transform .1s;
 }
-.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:hover { background: var(--green-hover); }
 .btn-primary:active { transform: translateY(1px); }
 
 .btn-ghost {
