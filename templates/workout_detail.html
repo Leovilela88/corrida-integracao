@@ -73,9 +73,10 @@
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; OpenStreetMap, &copy; CARTO · Powered by Strava', maxZoom: 19,
             }).addTo(map);
-            const line = L.polyline(pts, { color: '#60a5fa', weight: 4, opacity: 0.95 }).addTo(map);
-            L.circleMarker(pts[0], { radius: 5, color: '#22c55e', fillColor: '#22c55e', fillOpacity: 1 }).addTo(map);
-            L.circleMarker(pts[pts.length - 1], { radius: 5, color: '#ef4444', fillColor: '#ef4444', fillOpacity: 1 }).addTo(map);
+            L.polyline(pts, { color: '#04132f', weight: 8, opacity: 0.9 }).addTo(map);
+            const line = L.polyline(pts, { color: '#05e0a3', weight: 4.5, opacity: 1 }).addTo(map);
+            L.circleMarker(pts[0], { radius: 5, color: '#fff', fillColor: '#fff', fillOpacity: 1, weight: 2 }).addTo(map);
+            L.circleMarker(pts[pts.length - 1], { radius: 5, color: '#ef4444', fillColor: '#ef4444', fillOpacity: 1, weight: 2 }).addTo(map);
             map.fitBounds(line.getBounds(), { padding: [24, 24] });
             setTimeout(() => map.invalidateSize(), 200);
         }
