@@ -51,9 +51,14 @@
             </div>
             <ul class="plan-sessions">
                 {% for s in w.sessions %}
-                <li><span class="ps-tag">{{ s.tag }}</span> {{ s.desc }}</li>
+                <li>
+                    <span class="ps-day">Dia {{ loop.index }}</span>
+                    <span class="ps-cat">{{ s.tag }}</span>
+                    <span class="ps-desc">{{ s.desc }}</span>
+                </li>
                 {% endfor %}
             </ul>
+            <p class="plan-note">Distribua os dias na semana como preferir, respeitando 1 dia de descanso entre os treinos fortes.</p>
         </article>
         {% endfor %}
     </div>

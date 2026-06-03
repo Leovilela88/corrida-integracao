@@ -2525,17 +2525,24 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
 .plan-week-focus strong { font-size: 1rem; }
 .plan-week-focus span { font-size: 0.82rem; color: var(--muted); }
 .plan-week-head .challenge-badge { margin-left: auto; color: var(--green); }
-.plan-sessions { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.plan-sessions { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .plan-sessions li {
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
     font-size: 0.9rem; color: var(--text-2);
 }
-.ps-tag {
-    flex-shrink: 0; min-width: 92px; text-align: center;
-    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+.ps-day {
+    flex-shrink: 0; min-width: 58px; text-align: center;
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.02em;
+    color: var(--on-green); background: var(--green);
+    border-radius: 7px; padding: 4px 8px;
+}
+.ps-cat {
+    flex-shrink: 0; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
     color: var(--green); background: rgba(5,224,163,0.12);
     border: 1px solid rgba(5,224,163,0.28); border-radius: 7px; padding: 4px 8px;
 }
+.ps-desc { flex: 1; min-width: 140px; }
+.plan-note { margin: 12px 0 0; font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
 
 /* Banner "caminho até aqui" (topo do dashboard) */
 .path-banner {
