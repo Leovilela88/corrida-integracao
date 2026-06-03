@@ -213,12 +213,14 @@ html, body { overflow-x: hidden; max-width: 100%; }
     font-weight: 700;
     letter-spacing: -0.02em;
     margin: 0;
-    color: var(--text);
+    color: #ffffff;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.55);
 }
 .page-sub {
-    color: var(--muted);
+    color: #e8eef7;
     margin: 6px 0 0;
     font-size: 0.95rem;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 
 .streak-pill {
@@ -2250,12 +2252,12 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
     border: none;
     cursor: pointer;
     font: inherit;
-    font-weight: 600;
-    color: #fff;
-    background: linear-gradient(95deg, #3b82f6, #6366f1);
+    font-weight: 700;
+    color: var(--on-green);
+    background: linear-gradient(95deg, var(--green), #16c79a);
     border-radius: 12px;
     padding: 11px 18px;
-    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.22);
+    box-shadow: 0 4px 14px rgba(5, 224, 163, 0.25);
     transition: filter .15s, transform .1s;
 }
 .btn-share-cta:hover { filter: brightness(1.06); }
@@ -2272,9 +2274,9 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
     cursor: pointer;
     font: inherit;
     font-size: 0.78rem;
-    font-weight: 600;
-    color: #fff;
-    background: linear-gradient(95deg, #3b82f6, #6366f1);
+    font-weight: 700;
+    color: var(--on-green);
+    background: linear-gradient(95deg, var(--green), #16c79a);
     border-radius: 8px;
     padding: 6px 11px;
     white-space: nowrap;

@@ -4,6 +4,11 @@
 (function () {
     const ATHLETE = window.MF_ATHLETE || '';
     const W = 1080, H = 1920;
+    // Data da prova (abertura 5K, sábado) — base da regressiva no card
+    const RACE_TARGET = new Date('2026-09-26T07:00:00-03:00').getTime();
+    function daysToRace() {
+        return Math.max(0, Math.ceil((RACE_TARGET - Date.now()) / 86400000));
+    }
 
     // ---------------------------------------------------------------- estado
     let payload = null;       // { type, ... }
@@ -318,6 +323,47 @@
         return m;
     }
 
+    // Cabeçalho "esquenta": FALTAM XXX DIAS PARA A [logo Corrida Integração]
+    function drawCountdownTop(cx) {
+        const days = daysToRace();
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.shadowColor = 'rgba(0,0,0,0.6)';
+        ctx.shadowBlur = 14;
+        ctx.shadowOffsetY = 2;
+
+        if (days <= 0) {
+            ctx.fillStyle = '#05e0a3';
+            ctx.font = '800 84px Inter, sans-serif';
+            ctx.fillText('É HOJE!', cx, 250);
+        } else {
+            ctx.fillStyle = '#e8eef7';
+            ctx.font = '700 38px Inter, sans-serif';
+            if ('letterSpacing' in ctx) ctx.letterSpacing = '6px';
+            ctx.fillText('FALTAM', cx, 150);
+            if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+
+            ctx.fillStyle = '#05e0a3';
+            ctx.font = '800 170px Inter, sans-serif';
+            ctx.fillText(String(days), cx, 320);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '700 40px Inter, sans-serif';
+            if ('letterSpacing' in ctx) ctx.letterSpacing = '4px';
+            ctx.fillText(days === 1 ? 'DIA PARA A' : 'DIAS PARA A', cx, 384);
+            if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+        }
+
+        // logo wordmark (branco) centralizado abaixo
+        if (logoReady) {
+            const lw = 560, lh = logo.height * (lw / logo.width);
+            const ly = days <= 0 ? 300 : 420;
+            ctx.shadowBlur = 10;
+            ctx.drawImage(logo, cx - lw / 2, ly, lw, lh);
+        }
+        ctx.restore();
+    }
+
     function drawBrand(cx, y) {
         const txt = 'Corrida Integração 2026';
         ctx.font = '600 30px Inter, sans-serif';
@@ -573,6 +619,9 @@
         glow.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = glow; ctx.fillRect(0, 1000, W, H - 1000);
 
+        // cabeçalho de regressiva (esquenta pra prova) — só em treinos
+        if (payload.type === 'workout') drawCountdownTop(cx);
+
         // estilo "Completo": grade com todas as métricas
         if (payload.type === 'workout' && currentVariant() === 'full') {
             drawFullContent(cx, color);
@@ -647,7 +696,7 @@
     // navigator.share na mesma "tarefa" do clique — o Safari/iOS cancela o
     // compartilhamento se houver um await entre o gesto e o share.
     function doShare() {
-        const name = payload.type === 'badge' ? 'conquista-multifit.png' : 'treino-multifit.png';
+        const name = payload.type === 'badge' ? 'conquista-corrida-integracao.png' : 'treino-corrida-integracao.png';
         const text = payload.type === 'badge'
             ? `Desbloqueei a conquista "${payload.title}" no Corrida Integração! 💪`
             : `Treino de ${payload.sportLabel} registrado no Corrida Integração! 💪`;
@@ -696,7 +745,7 @@
         });
     }
 
-    window.Corrida IntegraçãoShare = { open, bind: bindButtons };
+    window.IntegracaoShare = { open, bind: bindButtons };
     document.addEventListener('DOMContentLoaded', () => bindButtons());
     bindButtons();
 })();
