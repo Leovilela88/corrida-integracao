@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}{{ "Editar treino" if workout else "Novo treino" }} - Corrida Integração{% endblock %}
+{% block title %}{{ "Editar atividade" if workout else "Nova atividade" }} - Corrida Integração{% endblock %}
 {% block content %}
 {% set dist_m = (workout.distance_km * 1000)|round|int if workout and workout.distance_km else '' %}
 <header class="page-header">
     <div>
-        <h1 class="page-title">{{ "Editar treino" if workout else "Novo treino" }}</h1>
-        <p class="page-sub">{{ "Editando treino de" if workout else "Registrando para" }} <strong>{{ athlete.name }}</strong> · calorias são estimadas automaticamente se o campo ficar vazio.</p>
+        <h1 class="page-title">{{ "Editar atividade" if workout else "Nova atividade" }}</h1>
+        <p class="page-sub">{{ "Editando atividade de" if workout else "Registrando para" }} <strong>{{ athlete.name }}</strong> · calorias são estimadas automaticamente se o campo ficar vazio.</p>
     </div>
 </header>
 <form method="post" action="{{ action }}" class="form" id="workout-form">
@@ -36,11 +36,11 @@
     </div>
     <label>
         <span>Notas</span>
-        <textarea name="notes" rows="3" placeholder="Como foi o treino?">{{ workout.notes if workout and workout.notes else '' }}</textarea>
+        <textarea name="notes" rows="3" placeholder="Como foi a atividade?">{{ workout.notes if workout and workout.notes else '' }}</textarea>
     </label>
     <div class="actions">
         <a href="{{ '/treinos' if workout else '/' }}" class="btn-ghost">Cancelar</a>
-        <button type="submit" class="btn-primary">{{ "Salvar alterações" if workout else "Salvar treino" }}</button>
+        <button type="submit" class="btn-primary">{{ "Salvar alterações" if workout else "Salvar atividade" }}</button>
     </div>
     <p class="form-foot">Atleta: <strong>{{ athlete.name }}</strong> · peso <strong>{{ "%.1f"|format(athlete.weight_kg) }} kg</strong> · <a href="/atletas">trocar / editar</a></p>
 </form>
