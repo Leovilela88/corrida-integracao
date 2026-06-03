@@ -334,30 +334,30 @@
 
         if (days <= 0) {
             ctx.fillStyle = '#05e0a3';
-            ctx.font = '800 84px Inter, sans-serif';
-            ctx.fillText('É HOJE!', cx, 250);
+            ctx.font = '800 72px Inter, sans-serif';
+            ctx.fillText('É HOJE!', cx, 230);
         } else {
             ctx.fillStyle = '#e8eef7';
-            ctx.font = '700 38px Inter, sans-serif';
+            ctx.font = '700 32px Inter, sans-serif';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '6px';
-            ctx.fillText('FALTAM', cx, 150);
+            ctx.fillText('FALTAM', cx, 140);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
             ctx.fillStyle = '#05e0a3';
-            ctx.font = '800 170px Inter, sans-serif';
-            ctx.fillText(String(days), cx, 320);
+            ctx.font = '800 130px Inter, sans-serif';
+            ctx.fillText(String(days), cx, 272);
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = '700 40px Inter, sans-serif';
+            ctx.font = '700 34px Inter, sans-serif';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '4px';
-            ctx.fillText(days === 1 ? 'DIA PARA A' : 'DIAS PARA A', cx, 384);
+            ctx.fillText(days === 1 ? 'DIA PARA A' : 'DIAS PARA A', cx, 326);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
         }
 
         // logo wordmark (branco) centralizado abaixo
         if (logoReady) {
-            const lw = 560, lh = logo.height * (lw / logo.width);
-            const ly = days <= 0 ? 300 : 420;
+            const lw = 430, lh = logo.height * (lw / logo.width);
+            const ly = days <= 0 ? 270 : 356;
             ctx.shadowBlur = 10;
             ctx.drawImage(logo, cx - lw / 2, ly, lw, lh);
         }
@@ -366,15 +366,15 @@
 
     function drawBrand(cx, y) {
         const txt = 'Corrida Integração 2026';
-        ctx.font = '600 30px Inter, sans-serif';
+        ctx.font = '700 34px Inter, sans-serif';
         ctx.textAlign = 'left';
         const tw = ctx.measureText(txt).width;
-        const lh = 36, lw = logoReady ? logo.width * (lh / logo.height) : 0;
-        const gap = lw ? 12 : 0;
+        const lh = 44, lw = logoReady ? logo.width * (lh / logo.height) : 0;
+        const gap = lw ? 14 : 0;
         const total = lw + gap + tw;
         const x = cx - total / 2;
-        if (logoReady) ctx.drawImage(logo, x, y - lh + 8, lw, lh);
-        ctx.fillStyle = '#93c5fd';
+        if (logoReady) ctx.drawImage(logo, x, y - lh + 10, lw, lh);
+        ctx.fillStyle = '#ffffff';
         ctx.fillText(txt, x + lw + gap, y);
         ctx.textAlign = 'center';
     }
@@ -434,12 +434,12 @@
         const startX = cx - (colW * n) / 2 + colW / 2;
         mts.forEach((mt, i) => {
             const x = startX + i * colW;
-            drawIcon(mt.icon, x, m.metricsIconCy, 25, color);
+            drawIcon(mt.icon, x, m.metricsIconCy, 25, '#ffffff');
             ctx.textAlign = 'center';
             ctx.fillStyle = '#ffffff';
             ctx.font = '800 48px Inter, sans-serif';
             ctx.fillText(mt.value, x, m.metricsValueY);
-            ctx.fillStyle = '#94a3b8';
+            ctx.fillStyle = '#ffffff';
             ctx.font = '600 24px Inter, sans-serif';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '1px';
             ctx.fillText((mt.label || '').toUpperCase(), x, m.metricsLabelY);
@@ -450,30 +450,38 @@
     function drawContent(m) {
         const cx = W / 2;
         const color = payload.color;
+        const isWorkout = payload.type === 'workout';
 
-        // selo (ponto)
-        ctx.beginPath();
-        ctx.arc(cx, m.dotCy, 15, 0, Math.PI * 2);
-        ctx.fillStyle = color; ctx.fill();
+        // selo (ponto) + rótulo (conquista/período) — não em treinos
+        if (!isWorkout) {
+            ctx.beginPath();
+            ctx.arc(cx, m.dotCy, 15, 0, Math.PI * 2);
+            ctx.fillStyle = color; ctx.fill();
 
-        // rótulo (conquista / data)
-        ctx.fillStyle = color;
-        ctx.font = '600 32px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        if ('letterSpacing' in ctx) ctx.letterSpacing = '2px';
-        const labelTxt = payload.type === 'badge' ? 'CONQUISTA DESBLOQUEADA'
-            : payload.type === 'period' ? (payload.periodLabel || '').toUpperCase()
-            : (payload.dateLabel || '').toUpperCase();
-        if (labelTxt) ctx.fillText(labelTxt, cx, m.labelY);
-        if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+            ctx.fillStyle = color;
+            ctx.font = '600 32px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            if ('letterSpacing' in ctx) ctx.letterSpacing = '2px';
+            const labelTxt = payload.type === 'badge' ? 'CONQUISTA DESBLOQUEADA'
+                : (payload.periodLabel || '').toUpperCase();
+            if (labelTxt) ctx.fillText(labelTxt, cx, m.labelY);
+            if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+        }
 
         // título
+        ctx.textAlign = 'center';
         ctx.fillStyle = '#ffffff';
-        ctx.font = '800 86px Inter, sans-serif';
-        const titleTxt = payload.type === 'badge' ? payload.title
-            : payload.type === 'period' ? 'Resumo'
-            : payload.sportLabel;
-        ctx.fillText(titleTxt, cx, m.titleY);
+        if (isWorkout) {
+            // slogan da corrida no lugar do nome do esporte (só temos corrida)
+            ctx.font = '800 60px Inter, sans-serif';
+            const sloganLines = wrap('A minha maior vitória é a próxima', 900);
+            sloganLines.forEach((ln, i) => {
+                ctx.fillText(ln, cx, m.titleY - (sloganLines.length - 1 - i) * 70);
+            });
+        } else {
+            ctx.font = '800 86px Inter, sans-serif';
+            ctx.fillText(payload.type === 'badge' ? payload.title : 'Resumo', cx, m.titleY);
+        }
 
         // corpo
         if (payload.type === 'badge') {
@@ -507,11 +515,11 @@
         // divisor
         ctx.strokeStyle = 'rgba(148,163,184,0.28)';
         ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(cx - 200, m.divY); ctx.lineTo(cx + 200, m.divY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx - 220, m.divY); ctx.lineTo(cx + 220, m.divY); ctx.stroke();
 
-        // atleta
-        ctx.fillStyle = '#e2e8f0';
-        ctx.font = '700 36px Inter, sans-serif';
+        // atleta (rodapé com mais destaque)
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '800 44px Inter, sans-serif';
         ctx.fillText(ATHLETE, cx, m.athleteY);
 
         // marca (logo pequeno + nome)
@@ -534,31 +542,26 @@
             const lastAlone = (i === all.length - 1) && (all.length % 2 === 1);
             const x = lastAlone ? cx : (c === 0 ? leftCx : rightCx);
             const top = gridTop + Math.floor(i / cols) * rowH;
-            drawIcon(mt.icon, x, top, 23, color);
+            drawIcon(mt.icon, x, top, 23, '#ffffff');
             ctx.fillStyle = '#ffffff'; ctx.font = '800 44px Inter, sans-serif';
             ctx.fillText(mt.value, x, top + 56);
-            ctx.fillStyle = '#94a3b8'; ctx.font = '600 23px Inter, sans-serif';
+            ctx.fillStyle = '#ffffff'; ctx.font = '600 23px Inter, sans-serif';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '1px';
             ctx.fillText((mt.label || '').toUpperCase(), x, top + 90);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
         });
 
+        // slogan no lugar do nome do esporte (sem ponto/data)
         const titleY = gridTop - 66;
-        ctx.fillStyle = '#ffffff'; ctx.font = '800 78px Inter, sans-serif';
-        ctx.fillText(payload.sportLabel, cx, titleY);
-
-        const labelY = titleY - 64;
-        ctx.fillStyle = color; ctx.font = '600 30px Inter, sans-serif';
-        if ('letterSpacing' in ctx) ctx.letterSpacing = '2px';
-        if (payload.dateLabel) ctx.fillText(payload.dateLabel.toUpperCase(), cx, labelY);
-        if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
-
-        ctx.beginPath(); ctx.arc(cx, labelY - 50, 14, 0, Math.PI * 2);
-        ctx.fillStyle = color; ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.font = '800 54px Inter, sans-serif';
+        const sloganLines = wrap('A minha maior vitória é a próxima', 900);
+        sloganLines.forEach((ln, i) => {
+            ctx.fillText(ln, cx, titleY - (sloganLines.length - 1 - i) * 62);
+        });
 
         ctx.strokeStyle = 'rgba(148,163,184,0.28)'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(cx - 200, divY); ctx.lineTo(cx + 200, divY); ctx.stroke();
-        ctx.fillStyle = '#e2e8f0'; ctx.font = '700 36px Inter, sans-serif';
+        ctx.beginPath(); ctx.moveTo(cx - 220, divY); ctx.lineTo(cx + 220, divY); ctx.stroke();
+        ctx.fillStyle = '#ffffff'; ctx.font = '800 44px Inter, sans-serif';
         ctx.fillText(ATHLETE, cx, athleteY);
         drawBrand(cx, brandY);
     }
@@ -631,7 +634,7 @@
         // estilo "Rota": desenha o traçado GPS na parte de cima, deslocado um
         // pouco pra esquerda (deixa o lado direito mais livre, ex: pra foto)
         if (payload.type === 'workout' && currentVariant() === 'route' && payload.route) {
-            drawRouteShape(payload.route, W * 0.40, 250, 720, 620, color);
+            drawRouteShape(payload.route, W * 0.32, 720, 660, 540, color);
         }
 
         drawContent(layout(H - 96));
