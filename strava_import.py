@@ -51,13 +51,9 @@ COL_ALIASES = {
 
 # Strava activity type -> nosso sport
 SPORT_MAP = {
-    # corrida
+    # corrida (apenas Run de rua — sem trail/virtual)
     "run": "corrida",
-    "trailrun": "corrida",
-    "virtualrun": "corrida",
     "corrida": "corrida",
-    "corridadetrilha": "corrida",
-    "corridavirtual": "corrida",
     # natação
     "swim": "natacao",
     "natacao": "natacao",

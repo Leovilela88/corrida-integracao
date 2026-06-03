@@ -123,9 +123,9 @@ def _extra_metrics(act: dict) -> Optional[dict]:
 
 
 def _is_running(act: dict) -> bool:
-    """Apenas atividades de corrida (Run, TrailRun, VirtualRun) entram no app."""
-    t = (act.get("sport_type") or act.get("type") or "").lower()
-    return "run" in t
+    """Apenas corrida de rua (Run). Exclui TrailRun, VirtualRun e afins."""
+    t = (act.get("sport_type") or act.get("type") or "").strip().lower()
+    return t == "run"
 
 
 def _to_workout(act: dict) -> Optional[ParsedWorkout]:
