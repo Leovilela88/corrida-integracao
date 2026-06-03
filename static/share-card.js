@@ -21,12 +21,8 @@
     const VARIANT_LABELS = { metrics: 'Métricas', route: 'Rota', full: 'Completo' };
 
     function variantsFor(p) {
-        if (p.type === 'workout') {
-            const v = ['metrics'];
-            if (p.route) v.push('route');
-            if (p.extras && p.extras.length) v.push('full');
-            return v;
-        }
+        // Card único: apenas "Métricas" (sem variantes de rota/completo)
+        if (p.type === 'workout') return ['metrics'];
         return ['default'];
     }
     function currentVariant() { return variants[variantIdx] || variants[0]; }
