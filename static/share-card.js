@@ -36,7 +36,7 @@
         ctx.fillStyle = '#e8eef7';
         ctx.font = '700 26px Inter, sans-serif';
         if ('letterSpacing' in ctx) ctx.letterSpacing = '5px';
-        ctx.fillText('VOCÊ É', cx, 120);
+        ctx.fillText('EU SOU', cx, 120);
         if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
         ctx.fillStyle = '#05e0a3';
         ctx.font = '800 92px Inter, sans-serif';

@@ -64,12 +64,12 @@ class EventChallenge:
 EVENT_CHALLENGES = [
     EventChallenge(
         "voo_curto", "Voo Curto",
-        "Encare as duas provas e leve a medalha especial do desafio.",
+        "Desafio da 41ª Corrida Integração: encare as duas provas e leve a medalha especial.",
         ["5K · sábado (26/09)", "10K · domingo (27/09)"],
     ),
     EventChallenge(
         "voo_longo", "Voo Longo",
-        "O desafio completo: a abertura no sábado e a meia no domingo.",
+        "Desafio da 41ª Corrida Integração: a abertura no sábado e a meia no domingo.",
         ["5K · sábado (26/09)", "21K · domingo (27/09)"],
     ),
 ]

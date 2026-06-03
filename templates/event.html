@@ -23,25 +23,24 @@
     </div>
 
     <div class="route-tabs" role="tablist">
-        <button type="button" class="route-tab is-active" data-mid="1iFxX6PtKv5L5wsIX2Zz6e8_5L-agQNk"
-                data-label="5K · sábado (26/09)">5K</button>
-        <button type="button" class="route-tab" data-mid="1r6FhHE72PStMlsK2hECOpvkXOkG6Gfw"
-                data-label="10K · domingo (27/09)">10K</button>
-        <button type="button" class="route-tab" data-mid="1XlLkWK7PYtjOCPw6Lq0i5dLYMnw8stY"
-                data-label="21K · domingo (27/09)">21K</button>
+        <button type="button" class="route-tab is-active" data-dist="5K"
+                data-mid="1iFxX6PtKv5L5wsIX2Zz6e8_5L-agQNk" data-label="5K · sábado (26/09)">5K</button>
+        <button type="button" class="route-tab" data-dist="10K"
+                data-mid="1r6FhHE72PStMlsK2hECOpvkXOkG6Gfw" data-label="10K · domingo (27/09)">10K</button>
+        <button type="button" class="route-tab" data-dist="21K"
+                data-mid="1XlLkWK7PYtjOCPw6Lq0i5dLYMnw8stY" data-label="21K · domingo (27/09)">21K</button>
     </div>
 
     <p class="route-caption" id="route-caption">5K · sábado (26/09)</p>
-    <div class="route-map">
-        <iframe id="route-iframe"
-                src="https://www.google.com/maps/d/embed?mid=1iFxX6PtKv5L5wsIX2Zz6e8_5L-agQNk"
-                title="Percurso da prova" loading="lazy" allowfullscreen></iframe>
-    </div>
+    <div class="route-map"><div id="route-leaflet"></div></div>
     <a id="route-open" class="route-open" target="_blank" rel="noopener"
        href="https://www.google.com/maps/d/viewer?mid=1iFxX6PtKv5L5wsIX2Zz6e8_5L-agQNk">
         {{ bicon('flag') }} Abrir no Google Maps
     </a>
 </section>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 {# ---------------- Informações ---------------- #}
 <section class="panel-section">
@@ -120,18 +119,48 @@
 
 <script>
     (function () {
-        const iframe = document.getElementById('route-iframe');
         const caption = document.getElementById('route-caption');
         const open = document.getElementById('route-open');
-        document.querySelectorAll('.route-tab').forEach((tab) => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.route-tab').forEach((t) => t.classList.remove('is-active'));
-                tab.classList.add('is-active');
-                const mid = tab.dataset.mid;
-                iframe.src = 'https://www.google.com/maps/d/embed?mid=' + mid;
-                open.href = 'https://www.google.com/maps/d/viewer?mid=' + mid;
-                caption.textContent = tab.dataset.label;
+        let map, line;
+
+        function initMap() {
+            map = L.map('route-leaflet', { zoomControl: true, attributionControl: true, scrollWheelZoom: false });
+            // tiles dark (CartoDB dark matter) — fundo escuro
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19,
+            }).addTo(map);
+        }
+
+        function drawRoute(pts) {
+            if (!pts || pts.length < 2) return;
+            if (line) map.removeLayer(line);
+            // contorno escuro + traçado verde neon (padrão Corrida Integração)
+            const outline = L.polyline(pts, { color: '#04132f', weight: 9, opacity: 0.9 });
+            line = L.layerGroup([
+                outline,
+                L.polyline(pts, { color: '#05e0a3', weight: 5, opacity: 1 }),
+                L.circleMarker(pts[0], { radius: 6, color: '#fff', fillColor: '#fff', fillOpacity: 1, weight: 2 }),
+                L.circleMarker(pts[pts.length - 1], { radius: 6, color: '#ef4444', fillColor: '#ef4444', fillOpacity: 1, weight: 2 }),
+            ]).addTo(map);
+            map.fitBounds(L.latLngBounds(pts).pad(0.12));
+        }
+
+        fetch('/static/routes.json').then((r) => r.json()).then((routes) => {
+            initMap();
+            drawRoute(routes['5K']);
+            setTimeout(() => map.invalidateSize(), 200);
+            document.querySelectorAll('.route-tab').forEach((tab) => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.route-tab').forEach((t) => t.classList.remove('is-active'));
+                    tab.classList.add('is-active');
+                    caption.textContent = tab.dataset.label;
+                    open.href = 'https://www.google.com/maps/d/viewer?mid=' + tab.dataset.mid;
+                    drawRoute(routes[tab.dataset.dist]);
+                });
             });
+        }).catch(() => {
+            document.getElementById('route-leaflet').innerHTML =
+                '<p style="padding:24px;text-align:center;color:var(--muted)">Não foi possível carregar o mapa.</p>';
         });
     })();
 </script>
