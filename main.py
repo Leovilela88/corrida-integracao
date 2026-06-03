@@ -1865,6 +1865,29 @@ def event_page(request: Request, db: Session = Depends(get_db)):
     )
 
 
+@app.get("/medalhas", response_class=HTMLResponse)
+def medals_page(request: Request, db: Session = Depends(get_db)):
+    """Medalhas finisher (5K/10K/21K) a partir das corridas do atleta."""
+    athlete = get_active_athlete(request, db)
+    medals = stats.finisher_medals(db, athlete.id)
+    # payload pronto pro card de compartilhamento (medalha)
+    for med in medals:
+        if med["earned"]:
+            med["share"] = {
+                "type": "medal",
+                "medalLabel": med["label"],
+                "color": "#05e0a3",
+                "metrics": [
+                    {"icon": "distance", "value": f"{med['km']:.2f}".replace(".", ",") + " km", "label": "distância"},
+                    {"icon": "clock", "value": med["time"], "label": "tempo"},
+                    {"icon": "pace", "value": med["pace"] + "/km", "label": "pace"},
+                ],
+            }
+    return templates.TemplateResponse(
+        "medals.html", {"request": request, "athlete": athlete, "medals": medals}
+    )
+
+
 @app.get("/desafios", response_class=HTMLResponse)
 def challenges_page(request: Request, db: Session = Depends(get_db)):
     athlete = get_active_athlete(request, db)

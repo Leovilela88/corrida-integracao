@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "_macros.html" import bicon %}
+{% block title %}Medalhas - Corrida Integração{% endblock %}
+{% block content %}
+
+<section class="event-hero">
+    <span class="race-hero-tag">Finisher</span>
+    <h1 class="event-title">Suas medalhas</h1>
+    <p class="event-sub">Complete as distâncias da 41ª Corrida Integração e compartilhe sua conquista.</p>
+</section>
+
+<section class="panel-section">
+    <div class="medal-grid">
+        {% for med in medals %}
+        <article class="medal-card {% if med.earned %}is-earned{% endif %}">
+            <div class="medal-disc">
+                {% if med.earned %}{{ bicon('medal') }}{% else %}{{ bicon('flag') }}{% endif %}
+                <span class="medal-dist">{{ med.label }}</span>
+            </div>
+            {% if med.earned %}
+            <div class="medal-body">
+                <div class="medal-time">{{ med.time }}</div>
+                <div class="medal-meta">{{ med.km|string|replace('.', ',') }} km · {{ med.pace }}/km · {{ med.date.strftime('%d/%m/%y') }}</div>
+            </div>
+            <button type="button" class="btn-share-cta" data-mf-share='{{ med.share|tojson }}'>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Compartilhar medalha
+            </button>
+            {% else %}
+            <div class="medal-body">
+                <p class="medal-locked">Complete uma corrida de <strong>{{ med.label }}</strong> para desbloquear.</p>
+            </div>
+            <a href="/importar" class="btn-ghost btn-small">Importar do Strava</a>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

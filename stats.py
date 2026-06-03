@@ -398,6 +398,39 @@ def pace_trend(db: Session, athlete_id: int, today: date, sport: str = "corrida"
     return {"cur": fmt(cur), "prev": fmt(prev), "pct": pct, "faster": cur < prev}
 
 
+# Distâncias oficiais da prova (rótulo, km alvo)
+MEDAL_DISTANCES = [("5K", 5.0), ("10K", 10.0), ("21K", 21.0975)]
+
+
+def finisher_medals(db: Session, athlete_id: int) -> list:
+    """Medalhas finisher por distância oficial. Considera a melhor corrida
+    (menor tempo) com distância >= alvo (3% de tolerância). Modo demo: não
+    exige a data da prova — vale qualquer corrida registrada (Strava/manual)."""
+    out = []
+    for label, target in MEDAL_DISTANCES:
+        row = (
+            db.query(Workout)
+            .filter(Workout.athlete_id == athlete_id, Workout.sport == "corrida",
+                    Workout.distance_km >= target * 0.97,
+                    Workout.duration_min.isnot(None), Workout.duration_min > 0)
+            .order_by(Workout.duration_min.asc())
+            .first()
+        )
+        if row:
+            secs_per_km = row.duration_min * 60 / row.distance_km
+            m, s = divmod(int(round(secs_per_km)), 60)
+            out.append({
+                "label": label, "target": target, "earned": True,
+                "time": _fmt_time(row.duration_min),
+                "pace": f"{m}:{s:02d}",
+                "km": round(row.distance_km, 2),
+                "date": row.date,
+            })
+        else:
+            out.append({"label": label, "target": target, "earned": False})
+    return out
+
+
 def _fmt_time(minutes: float) -> str:
     """Minutos decimais -> H:MM:SS ou MM:SS."""
     total = int(round(minutes * 60))

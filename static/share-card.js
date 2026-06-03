@@ -25,6 +25,29 @@
         if (p.type === 'workout') return ['metrics'];
         return ['default'];
     }
+
+    // Cabeçalho da medalha: "VOCÊ É FINISHER" + logo
+    function drawMedalTop(cx) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.shadowColor = 'rgba(0,0,0,0.6)';
+        ctx.shadowBlur = 14;
+        ctx.shadowOffsetY = 2;
+        ctx.fillStyle = '#e8eef7';
+        ctx.font = '700 26px Inter, sans-serif';
+        if ('letterSpacing' in ctx) ctx.letterSpacing = '5px';
+        ctx.fillText('VOCÊ É', cx, 120);
+        if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+        ctx.fillStyle = '#05e0a3';
+        ctx.font = '800 92px Inter, sans-serif';
+        ctx.fillText('FINISHER', cx, 212);
+        if (logoReady) {
+            const lw = 344, lh = logo.height * (lw / logo.width);
+            ctx.shadowBlur = 10;
+            ctx.drawImage(logo, cx - lw / 2, 250, lw, lh);
+        }
+        ctx.restore();
+    }
     function currentVariant() { return variants[variantIdx] || variants[0]; }
 
     // ---------------------------------------------------------------- DOM
@@ -447,9 +470,10 @@
         const cx = W / 2;
         const color = payload.color;
         const isWorkout = payload.type === 'workout';
+        const isClean = isWorkout || payload.type === 'medal';
 
-        // selo (ponto) + rótulo (conquista/período) — não em treinos
-        if (!isWorkout) {
+        // selo (ponto) + rótulo (conquista/período) — não em treinos/medalhas
+        if (!isClean) {
             ctx.beginPath();
             ctx.arc(cx, m.dotCy, 15, 0, Math.PI * 2);
             ctx.fillStyle = color; ctx.fill();
@@ -474,6 +498,10 @@
             sloganLines.forEach((ln, i) => {
                 ctx.fillText(ln, cx, m.titleY - (sloganLines.length - 1 - i) * 70);
             });
+        } else if (payload.type === 'medal') {
+            // distância da medalha em destaque
+            ctx.font = '800 100px Inter, sans-serif';
+            ctx.fillText(payload.medalLabel, cx, m.titleY);
         } else {
             ctx.font = '800 86px Inter, sans-serif';
             ctx.fillText(payload.type === 'badge' ? payload.title : 'Resumo', cx, m.titleY);
@@ -508,9 +536,9 @@
             drawMetricsRow(payload.metrics || [], m, color);
         }
 
-        // rodapé (divisor + atleta + marca) — só em conquistas/resumo; no treino o
-        // card fica limpo (a marca já aparece grande na regressiva do topo)
-        if (!isWorkout) {
+        // rodapé (divisor + atleta + marca) — só em conquistas/resumo; treino e
+        // medalha ficam limpos (a marca já aparece grande no topo)
+        if (!isClean) {
             ctx.strokeStyle = 'rgba(148,163,184,0.28)';
             ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(cx - 220, m.divY); ctx.lineTo(cx + 220, m.divY); ctx.stroke();
@@ -618,8 +646,9 @@
         glow.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = glow; ctx.fillRect(0, 1000, W, H - 1000);
 
-        // cabeçalho de regressiva (esquenta pra prova) — só em treinos
+        // cabeçalho do topo: regressiva (treino) ou "FINISHER" (medalha)
         if (payload.type === 'workout') drawCountdownTop(cx);
+        else if (payload.type === 'medal') drawMedalTop(cx);
 
         // estilo "Completo": grade com todas as métricas
         if (payload.type === 'workout' && currentVariant() === 'full') {
@@ -633,8 +662,9 @@
             drawRouteShape(payload.route, W * 0.22, 760, 330, 270, '#05e0a3');
         }
 
-        // treino não tem rodapé -> ancora o bloco bem mais embaixo
-        drawContent(layout(payload.type === 'workout' ? H + 26 : H - 96));
+        // treino e medalha não têm rodapé -> ancora o bloco bem mais embaixo
+        const clean = payload.type === 'workout' || payload.type === 'medal';
+        drawContent(layout(clean ? H + 26 : H - 96));
     }
 
     async function render() {
@@ -696,10 +726,16 @@
     // navigator.share na mesma "tarefa" do clique — o Safari/iOS cancela o
     // compartilhamento se houver um await entre o gesto e o share.
     function doShare() {
-        const name = payload.type === 'badge' ? 'conquista-corrida-integracao.png' : 'treino-corrida-integracao.png';
-        const text = payload.type === 'badge'
-            ? `Desbloqueei a conquista "${payload.title}" no Corrida Integração! 💪`
-            : `Treino de ${payload.sportLabel} registrado no Corrida Integração! 💪`;
+        const names = {
+            badge: 'conquista-corrida-integracao.png',
+            medal: 'medalha-corrida-integracao.png',
+        };
+        const name = names[payload.type] || 'treino-corrida-integracao.png';
+        const texts = {
+            badge: `Desbloqueei a conquista "${payload.title}" no Corrida Integração! 💪`,
+            medal: `Sou FINISHER ${payload.medalLabel} da 41ª Corrida Integração! 🏅`,
+        };
+        const text = texts[payload.type] || `Treino de ${payload.sportLabel} registrado no Corrida Integração! 💪`;
         let dataUrl;
         try { dataUrl = canvas.toDataURL('image/png'); }
         catch (_) { return; }

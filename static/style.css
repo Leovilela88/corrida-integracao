@@ -2445,3 +2445,38 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
 .faq-item summary::after { content: '+'; color: var(--green); font-size: 1.3rem; font-weight: 700; }
 .faq-item[open] summary::after { content: '−'; }
 .faq-item p { margin: 10px 0 0; color: var(--text-2); font-size: 0.9rem; line-height: 1.5; }
+
+/* ===================== Medalhas finisher (/medalhas) ===================== */
+.medal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.medal-card {
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    background: var(--panel); border: 1px solid var(--border-strong);
+    border-radius: 16px; padding: 20px 18px; text-align: center;
+}
+.medal-card.is-earned {
+    background: linear-gradient(160deg, rgba(5,224,163,0.12), var(--panel));
+    border-color: rgba(5,224,163,0.4);
+}
+.medal-disc {
+    position: relative; width: 92px; height: 92px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--panel-2); border: 2px solid var(--border-strong); color: var(--muted-2);
+}
+.medal-card.is-earned .medal-disc {
+    background: radial-gradient(circle at 50% 35%, rgba(5,224,163,0.35), rgba(5,224,163,0.08));
+    border-color: var(--green); color: var(--green);
+    box-shadow: 0 0 24px rgba(5,224,163,0.3);
+}
+.medal-disc svg { width: 40px; height: 40px; }
+.medal-dist {
+    position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.04em;
+    background: var(--green); color: var(--on-green);
+    padding: 2px 10px; border-radius: 999px;
+}
+.medal-card:not(.is-earned) .medal-dist { background: var(--muted-2); color: #0b1220; }
+.medal-body { min-height: 48px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.medal-time { font-size: 1.8rem; font-weight: 800; color: var(--text); }
+.medal-meta { font-size: 0.8rem; color: var(--text-2); }
+.medal-locked { font-size: 0.88rem; color: var(--text-2); margin: 0; line-height: 1.4; }
+.medal-card .btn-share-cta, .medal-card .btn-ghost { width: 100%; justify-content: center; }
