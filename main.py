@@ -1856,6 +1856,15 @@ def achievements_page(request: Request, db: Session = Depends(get_db)):
 
 # ------------- desafios -------------
 
+@app.get("/evento", response_class=HTMLResponse)
+def event_page(request: Request, db: Session = Depends(get_db)):
+    """Página oficial da prova: percurso, informações, kits e FAQ."""
+    athlete = get_active_athlete(request, db)
+    return templates.TemplateResponse(
+        "event.html", {"request": request, "athlete": athlete}
+    )
+
+
 @app.get("/desafios", response_class=HTMLResponse)
 def challenges_page(request: Request, db: Session = Depends(get_db)):
     athlete = get_active_athlete(request, db)

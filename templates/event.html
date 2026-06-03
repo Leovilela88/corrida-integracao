@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% from "_macros.html" import bicon %}
+{% block title %}A Prova - Corrida Integração{% endblock %}
+{% block content %}
+
+<section class="event-hero">
+    <span class="race-hero-tag">Prova oficial</span>
+    <h1 class="event-title">41ª Corrida Integração</h1>
+    <p class="event-sub">26 e 27 de setembro de 2026 · Campinas/SP</p>
+    <div class="event-cta">
+        <a href="https://www.ticketsports.com.br/e/41%C2%AA+CORRIDA+INTEGRA%C3%87%C3%83O+CAMPINAS+-+2026-74224"
+           target="_blank" rel="noopener" class="btn-primary btn-small">Inscreva-se</a>
+        <a href="https://emc.empresaspioneiras.com.br/dbArquivos/ViaEPTV/regulamento_corrida_integracao_2026.pdf"
+           target="_blank" rel="noopener" class="btn-ghost btn-small">Regulamento</a>
+    </div>
+</section>
+
+{# ---------------- Percurso ---------------- #}
+<section class="panel-section">
+    <div class="section-head">
+        <h2>Percurso</h2>
+        <span class="section-sub">traçado dos anos anteriores (provisório)</span>
+    </div>
+
+    <div class="route-tabs" role="tablist">
+        <button type="button" class="route-tab is-active" data-mid="1iFxX6PtKv5L5wsIX2Zz6e8_5L-agQNk"
+                data-label="5K · sábado (26/09)">5K</button>
+        <button type="button" class="route-tab" data-mid="1r6FhHE72PStMlsK2hECOpvkXOkG6Gfw"
+                data-label="10K · domingo (27/09)">10K</button>
+        <button type="button" class="route-tab" data-mid="1XlLkWK7PYtjOCPw6Lq0i5dLYMnw8stY"
+                data-label="21K · domingo (27/09)">21K</button>
+    </div>
+
+    <p class="route-caption" id="route-caption">5K · sábado (26/09)</p>
+    <div class="route-map">
+        <iframe id="route-iframe"
+                src="https://www.google.com/maps/d/embed?mid=1iFxX6PtKv5L5wsIX2Zz6e8_5L-agQNk"
+                title="Percurso da prova" loading="lazy" allowfullscreen></iframe>
+    </div>
+    <a id="route-open" class="route-open" target="_blank" rel="noopener"
+       href="https://www.google.com/maps/d/viewer?mid=1iFxX6PtKv5L5wsIX2Zz6e8_5L-agQNk">
+        {{ bicon('flag') }} Abrir no Google Maps
+    </a>
+</section>
+
+{# ---------------- Informações ---------------- #}
+<section class="panel-section">
+    <div class="section-head"><h2>Informações</h2></div>
+    <div class="info-grid">
+        <div class="info-card">
+            <span class="info-ico">{{ bicon('flag') }}</span>
+            <div>
+                <strong>Distâncias</strong>
+                <p>5K (sábado, 26/09) · 10K e 21K (domingo, 27/09)</p>
+            </div>
+        </div>
+        <div class="info-card">
+            <span class="info-ico">{{ bicon('clock') }}</span>
+            <div>
+                <strong>Horário de largada</strong>
+                <p>A confirmar pela organização</p>
+            </div>
+        </div>
+        <div class="info-card">
+            <span class="info-ico">{{ bicon('flag') }}</span>
+            <div>
+                <strong>Local / arena</strong>
+                <p>Campinas/SP · local a confirmar</p>
+            </div>
+        </div>
+        <div class="info-card">
+            <span class="info-ico">{{ bicon('count') }}</span>
+            <div>
+                <strong>Retirada de kit</strong>
+                <p>Datas e endereço a confirmar</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ---------------- Kits ---------------- #}
+<section class="panel-section">
+    <div class="section-head">
+        <h2>Kits</h2>
+        <span class="section-sub">detalhes a confirmar</span>
+    </div>
+    <div class="kit-grid">
+        {% for kit in [
+            {'name':'Básico','items':['Número de peito','Chip de cronometragem','Medalha finisher']},
+            {'name':'Plus','items':['Tudo do Básico','Camiseta oficial','Sacochila']},
+            {'name':'Premium','items':['Tudo do Plus','Boné ou viseira','Brindes dos patrocinadores']}
+        ] %}
+        <article class="kit-card">
+            <div class="kit-name">{{ kit['name'] }}</div>
+            <ul class="kit-items">
+                {% for it in kit['items'] %}<li>{{ bicon('check') }} {{ it }}</li>{% endfor %}
+            </ul>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+
+{# ---------------- FAQ ---------------- #}
+<section class="panel-section">
+    <div class="section-head"><h2>Dúvidas frequentes</h2></div>
+    <div class="faq-list">
+        {% for q, a in [
+            ('Como faço minha inscrição?','Pelo botão "Inscreva-se" no topo desta página (TicketSports).'),
+            ('Posso correr as duas provas?','Sim! Os desafios Voo Curto e Voo Longo premiam quem corre no sábado e no domingo. Aceite na aba Desafios.'),
+            ('Onde retiro meu kit?','As datas e o endereço da retirada serão divulgados pela organização.'),
+            ('Tem limite de idade?','Consulte o regulamento oficial para as regras de cada distância.')
+        ] %}
+        <details class="faq-item">
+            <summary>{{ q }}</summary>
+            <p>{{ a }}</p>
+        </details>
+        {% endfor %}
+    </div>
+</section>
+
+<script>
+    (function () {
+        const iframe = document.getElementById('route-iframe');
+        const caption = document.getElementById('route-caption');
+        const open = document.getElementById('route-open');
+        document.querySelectorAll('.route-tab').forEach((tab) => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.route-tab').forEach((t) => t.classList.remove('is-active'));
+                tab.classList.add('is-active');
+                const mid = tab.dataset.mid;
+                iframe.src = 'https://www.google.com/maps/d/embed?mid=' + mid;
+                open.href = 'https://www.google.com/maps/d/viewer?mid=' + mid;
+                caption.textContent = tab.dataset.label;
+            });
+        });
+    })();
+</script>
+{% endblock %}
