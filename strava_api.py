@@ -145,7 +145,7 @@ def _to_workout(act: dict) -> Optional[ParsedWorkout]:
         name = act.get("name")
         poly = (act.get("map") or {}).get("summary_polyline") or None
         return ParsedWorkout(
-            date=d, sport=_map_sport(act), distance_km=dist_km,
+            date=d, sport="corrida", distance_km=dist_km,
             duration_min=dur_min, calories=cal, notes=(name or None),
             polyline=poly, extra=_extra_metrics(act),
         )
