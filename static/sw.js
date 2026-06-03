@@ -1,11 +1,10 @@
 // Service worker do Corrida Integração (PWA). Bump CACHE para forçar atualização.
-const CACHE = 'corrida-integracao-v3';
+const CACHE = 'corrida-integracao-v4';
 const PRECACHE = [
   '/offline',
-  '/static/icon.svg',
-  '/static/icon-192.v2.png',
-  '/static/icon-512.v2.png',
-  '/static/apple-touch-icon.v2.png',
+  '/static/icon-192.v3.png',
+  '/static/icon-512.v3.png',
+  '/static/apple-touch-icon.v3.png',
   '/static/manifest.webmanifest',
 ];
 
