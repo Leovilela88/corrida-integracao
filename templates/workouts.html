@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-{% block title %}Treinos - Corrida Integração{% endblock %}
+{% block title %}Atividades - Corrida Integração{% endblock %}
 {% block content %}
 <header class="page-header">
     <div>
-        <h1 class="page-title">Todos os treinos</h1>
-        <p class="page-sub"><strong>{{ total }}</strong> treino{{ 's' if total != 1 else '' }} de <strong>{{ athlete.name }}</strong>{% if sport %} · filtrando {{ sport_label(sport) }}{% endif %}</p>
+        <h1 class="page-title">Atividades</h1>
+        <p class="page-sub"><strong>{{ total }}</strong> atividade{{ 's' if total != 1 else '' }} de <strong>{{ athlete.name }}</strong>{% if sport %} · filtrando {{ sport_label(sport) }}{% endif %}</p>
     </div>
     <a href="/novo" class="btn-primary">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-        <span class="nav-label">Novo treino</span>
+        <span class="nav-label">Nova atividade</span>
     </a>
 </header>
 
@@ -127,7 +127,7 @@
     </div>
     {% endif %}
     {% else %}
-    <p class="empty">Nenhum treino {% if sport %}de {{ sport_label(sport) }} {% endif %}encontrado. <a href="/novo">Adicionar treino</a> →</p>
+    <p class="empty">Nenhuma atividade {% if sport %}de {{ sport_label(sport) }} {% endif %}encontrada. <a href="/novo">Adicionar atividade</a> →</p>
     {% endif %}
 </section>
 
