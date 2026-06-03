@@ -941,8 +941,15 @@ def dashboard(
         "6m": "Últimos 6 meses", "1y": "Último ano",
         "ytd": f"No ano de {today.year}", "all": "Desde o início",
     }
+    # Frase do card de resumo: "MEU CAMINHO ATÉ AQUI {phrase}"
+    _PERIOD_PHRASE = {
+        "1w": "EM UMA SEMANA", "1m": "EM UM MÊS", "3m": "EM 3 MESES",
+        "6m": "EM 6 MESES", "1y": "EM UM ANO",
+        "ytd": f"EM {today.year}", "all": "",
+    }
     share_period = stats.period_share(
-        db, athlete.id, start, today, _PERIOD_LABELS.get(range_key, "Período")
+        db, athlete.id, start, today, _PERIOD_LABELS.get(range_key, "Período"),
+        _PERIOD_PHRASE.get(range_key, ""),
     )
 
     return templates.TemplateResponse(

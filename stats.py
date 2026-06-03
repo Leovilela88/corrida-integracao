@@ -76,7 +76,7 @@ _SPORT_ORDER = ("corrida", "trilha", "bike", "natacao", "musculacao", "outro")
 
 
 def period_share(db: Session, athlete_id: int, start: date, end: date,
-                 period_label: str) -> dict:
+                 period_label: str, period_phrase: str = "") -> dict:
     """Payload do card de compartilhamento de um período: totais gerais +
     desdobramento por esporte (distância e calorias), cada um na sua cor."""
     overall = _aggregate(db, athlete_id, start, end)
@@ -112,7 +112,8 @@ def period_share(db: Session, athlete_id: int, start: date, end: date,
     return {
         "type": "period",
         "periodLabel": period_label,
-        "color": "#60a5fa",
+        "phrase": period_phrase,
+        "color": "#05e0a3",
         "totals": totals,
         "sports": sports,
     }

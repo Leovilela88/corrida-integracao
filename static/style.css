@@ -2536,3 +2536,18 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
     color: var(--green); background: rgba(5,224,163,0.12);
     border: 1px solid rgba(5,224,163,0.28); border-radius: 7px; padding: 4px 8px;
 }
+
+/* Banner "caminho até aqui" (topo do dashboard) */
+.path-banner {
+    display: flex; align-items: center; gap: 14px;
+    background: linear-gradient(135deg, rgba(5,224,163,0.12), var(--panel));
+    border: 1px solid rgba(5,224,163,0.30);
+    border-radius: 14px; padding: 16px 18px; margin-bottom: 22px;
+}
+.path-banner .path-ico {
+    width: 44px; height: 44px; flex-shrink: 0; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(5,224,163,0.16); color: var(--green);
+}
+.path-banner .path-ico svg { width: 22px; height: 22px; }
+.path-banner p { margin: 0; color: var(--text); font-size: 0.98rem; line-height: 1.4; }

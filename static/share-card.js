@@ -317,19 +317,8 @@
             m.bodyBottom = m.divY - 64;
             m.bodyTop = m.bodyBottom - (m.lines.length - 1) * 50;
             m.titleY = m.bodyTop - 72;
-        } else if (payload.type === 'period') {
-            // lista de esportes acima do divisor
-            const n = (payload.sports || []).length;
-            m.sportRowH = 60;
-            m.sportsBottom = m.divY - 54;       // baseline da última linha
-            m.sportsTop = m.sportsBottom - Math.max(0, n - 1) * m.sportRowH;
-            // linha de totais acima da lista
-            m.metricsLabelY = m.sportsTop - (n ? 78 : 20);
-            m.metricsValueY = m.metricsLabelY - 42;
-            m.metricsIconCy = m.metricsValueY - 74;
-            m.bodyTop = m.metricsIconCy - 30;
-            m.titleY = m.bodyTop - 58;
         } else {
+            // treino, medalha e resumo (período): só uma linha de métricas
             m.metricsLabelY = m.divY - 58;
             m.metricsValueY = m.metricsLabelY - 42;
             m.metricsIconCy = m.metricsValueY - 74;
@@ -470,9 +459,10 @@
         const cx = W / 2;
         const color = payload.color;
         const isWorkout = payload.type === 'workout';
-        const isClean = isWorkout || payload.type === 'medal';
+        const isPeriod = payload.type === 'period';
+        const isClean = isWorkout || payload.type === 'medal' || isPeriod;
 
-        // selo (ponto) + rótulo (conquista/período) — não em treinos/medalhas
+        // selo (ponto) + rótulo — só em conquistas (treino/medalha/resumo são limpos)
         if (!isClean) {
             ctx.beginPath();
             ctx.arc(cx, m.dotCy, 15, 0, Math.PI * 2);
@@ -482,9 +472,7 @@
             ctx.font = '600 32px Inter, sans-serif';
             ctx.textAlign = 'center';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '2px';
-            const labelTxt = payload.type === 'badge' ? 'CONQUISTA DESBLOQUEADA'
-                : (payload.periodLabel || '').toUpperCase();
-            if (labelTxt) ctx.fillText(labelTxt, cx, m.labelY);
+            if (payload.type === 'badge') ctx.fillText('CONQUISTA DESBLOQUEADA', cx, m.labelY);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
         }
 
@@ -498,40 +486,31 @@
             sloganLines.forEach((ln, i) => {
                 ctx.fillText(ln, cx, m.titleY - (sloganLines.length - 1 - i) * 70);
             });
+        } else if (isPeriod) {
+            // "MEU CAMINHO ATÉ AQUI [EM UM MÊS]"
+            ctx.font = '800 58px Inter, sans-serif';
+            const phrase = ('MEU CAMINHO ATÉ AQUI ' + (payload.phrase || '')).trim();
+            const lines = wrap(phrase, 900);
+            lines.forEach((ln, i) => {
+                ctx.fillText(ln, cx, m.titleY - (lines.length - 1 - i) * 68);
+            });
         } else if (payload.type === 'medal') {
-            // distância da medalha em destaque
             ctx.font = '800 100px Inter, sans-serif';
             ctx.fillText(payload.medalLabel, cx, m.titleY);
         } else {
             ctx.font = '800 86px Inter, sans-serif';
-            ctx.fillText(payload.type === 'badge' ? payload.title : 'Resumo', cx, m.titleY);
+            ctx.fillText(payload.title, cx, m.titleY);
         }
 
-        // corpo
+        // corpo (métricas)
         if (payload.type === 'badge') {
             ctx.fillStyle = '#cbd5e1';
             ctx.font = '400 38px Inter, sans-serif';
             m.lines.forEach((ln, i) => {
                 ctx.fillText(ln, cx, m.bodyBottom - (m.lines.length - 1 - i) * 50);
             });
-        } else if (payload.type === 'period') {
+        } else if (isPeriod) {
             drawMetricsRow(payload.totals || [], m, color);
-            // linha por esporte: ícone colorido + nome (cor) + distância/calorias
-            const sports = payload.sports || [];
-            const LX = cx - 380, RX = cx + 380;
-            sports.forEach((sp, i) => {
-                const y = m.sportsTop + i * m.sportRowH;
-                drawIcon(sp.icon, LX + 22, y - 12, 22, sp.color);
-                ctx.textAlign = 'left';
-                ctx.fillStyle = sp.color;
-                ctx.font = '700 36px Inter, sans-serif';
-                ctx.fillText(sp.label, LX + 56, y);
-                ctx.textAlign = 'right';
-                ctx.fillStyle = '#e2e8f0';
-                ctx.font = '500 34px Inter, sans-serif';
-                ctx.fillText(sp.main + '   ·   ' + sp.cal, RX, y);
-                ctx.textAlign = 'center';
-            });
         } else {
             drawMetricsRow(payload.metrics || [], m, color);
         }
@@ -646,8 +625,8 @@
         glow.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = glow; ctx.fillRect(0, 1000, W, H - 1000);
 
-        // cabeçalho do topo: regressiva (treino) ou "FINISHER" (medalha)
-        if (payload.type === 'workout') drawCountdownTop(cx);
+        // cabeçalho do topo: regressiva (treino/resumo) ou "FINISHER" (medalha)
+        if (payload.type === 'workout' || payload.type === 'period') drawCountdownTop(cx);
         else if (payload.type === 'medal') drawMedalTop(cx);
 
         // estilo "Completo": grade com todas as métricas
@@ -662,8 +641,8 @@
             drawRouteShape(payload.route, W * 0.22, 760, 330, 270, '#05e0a3');
         }
 
-        // treino e medalha não têm rodapé -> ancora o bloco bem mais embaixo
-        const clean = payload.type === 'workout' || payload.type === 'medal';
+        // treino, medalha e resumo não têm rodapé -> ancora o bloco bem mais embaixo
+        const clean = payload.type === 'workout' || payload.type === 'medal' || payload.type === 'period';
         drawContent(layout(clean ? H + 26 : H - 96));
     }
 
@@ -729,11 +708,13 @@
         const names = {
             badge: 'conquista-corrida-integracao.png',
             medal: 'medalha-corrida-integracao.png',
+            period: 'resumo-corrida-integracao.png',
         };
         const name = names[payload.type] || 'treino-corrida-integracao.png';
         const texts = {
             badge: `Desbloqueei a conquista "${payload.title}" no Corrida Integração! 💪`,
             medal: `Sou FINISHER ${payload.medalLabel} da 41ª Corrida Integração! 🏅`,
+            period: `Meu caminho até aqui rumo à 41ª Corrida Integração! 🏃`,
         };
         const text = texts[payload.type] || `Treino de ${payload.sportLabel} registrado no Corrida Integração! 💪`;
         let dataUrl;
