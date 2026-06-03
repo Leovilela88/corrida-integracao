@@ -2551,3 +2551,15 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
 }
 .path-banner .path-ico svg { width: 22px; height: 22px; }
 .path-banner p { margin: 0; color: var(--text); font-size: 0.98rem; line-height: 1.4; }
+
+/* Seletor de formato do card de compartilhamento + dica de hashtag */
+.share-format { display: flex; gap: 8px; justify-content: center; margin: 12px 0 4px; }
+.fmt-btn {
+    cursor: pointer; font: inherit; font-size: 0.82rem; font-weight: 700;
+    color: var(--text-2); background: var(--panel-2);
+    border: 1px solid var(--border-strong); border-radius: 999px; padding: 7px 16px;
+    transition: all .15s;
+}
+.fmt-btn.is-active { background: var(--green); color: var(--on-green); border-color: var(--green); }
+.share-tag-hint { text-align: center; margin: 12px 0 0; color: var(--text-2); font-size: 0.85rem; }
+.share-tag-hint strong { color: var(--green); }

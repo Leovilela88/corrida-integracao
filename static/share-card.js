@@ -3,7 +3,10 @@
    modo de fundo transparente e métricas por esporte com ícones. */
 (function () {
     const ATHLETE = window.MF_ATHLETE || '';
-    const W = 1080, H = 1920;
+    const W = 1080;
+    let H = 1920;            // 1920 = stories 9:16 · 1350 = feed 4:5
+    let fmt = 'story';
+    const HASHTAG = '#corridaintegracao';
     // Data da prova (abertura 5K, sábado) — base da regressiva no card
     const RACE_TARGET = new Date('2026-09-26T07:00:00-03:00').getTime();
     function daysToRace() {
@@ -34,17 +37,17 @@
         ctx.shadowBlur = 14;
         ctx.shadowOffsetY = 2;
         ctx.fillStyle = '#e8eef7';
-        ctx.font = '700 26px Inter, sans-serif';
+        ctx.font = '700 22px Inter, sans-serif';
         if ('letterSpacing' in ctx) ctx.letterSpacing = '5px';
-        ctx.fillText('EU SOU', cx, 120);
+        ctx.fillText('EU SOU', cx, 104);
         if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
         ctx.fillStyle = '#05e0a3';
-        ctx.font = '800 92px Inter, sans-serif';
-        ctx.fillText('FINISHER', cx, 212);
+        ctx.font = '800 76px Inter, sans-serif';
+        ctx.fillText('FINISHER', cx, 180);
         if (logoReady) {
-            const lw = 344, lh = logo.height * (lw / logo.width);
+            const lw = 280, lh = logo.height * (lw / logo.width);
             ctx.shadowBlur = 10;
-            ctx.drawImage(logo, cx - lw / 2, 250, lw, lh);
+            ctx.drawImage(logo, cx - lw / 2, 212, lw, lh);
         }
         ctx.restore();
     }
@@ -72,6 +75,10 @@
                     </div>
                     <button type="button" class="variant-arrow" data-role="next" aria-label="Próximo">›</button>
                 </div>
+                <div class="share-format" data-role="format">
+                    <button type="button" class="fmt-btn is-active" data-fmt="story">Stories 9:16</button>
+                    <button type="button" class="fmt-btn" data-fmt="feed">Feed 4:5</button>
+                </div>
                 <p class="share-hint" data-role="drag" hidden>Arraste a foto para posicionar</p>
                 <label class="share-toggle">
                     <input type="checkbox" data-role="trans" />
@@ -88,6 +95,7 @@
                         Compartilhar
                     </button>
                 </div>
+                <p class="share-tag-hint">Compartilhe nas redes com <strong>#corridaintegracao</strong></p>
             </div>`;
         document.body.appendChild(overlay);
 
@@ -114,7 +122,19 @@
             render();
         });
         overlay.querySelector('[data-role="do"]').addEventListener('click', doShare);
+        overlay.querySelectorAll('.fmt-btn').forEach((b) => {
+            b.addEventListener('click', () => setFormat(b.dataset.fmt));
+        });
         bindDrag();
+    }
+
+    function setFormat(f) {
+        fmt = f;
+        H = (f === 'feed') ? 1350 : 1920;
+        if (canvas) canvas.height = H;
+        if (overlay) overlay.querySelectorAll('.fmt-btn').forEach((b) =>
+            b.classList.toggle('is-active', b.dataset.fmt === f));
+        render();
     }
 
     function syncControls() {
@@ -342,30 +362,30 @@
 
         if (days <= 0) {
             ctx.fillStyle = '#05e0a3';
-            ctx.font = '800 58px Inter, sans-serif';
-            ctx.fillText('É HOJE!', cx, 200);
+            ctx.font = '800 48px Inter, sans-serif';
+            ctx.fillText('É HOJE!', cx, 172);
         } else {
             ctx.fillStyle = '#e8eef7';
-            ctx.font = '700 26px Inter, sans-serif';
-            if ('letterSpacing' in ctx) ctx.letterSpacing = '5px';
-            ctx.fillText('FALTAM', cx, 120);
+            ctx.font = '700 22px Inter, sans-serif';
+            if ('letterSpacing' in ctx) ctx.letterSpacing = '4px';
+            ctx.fillText('FALTAM', cx, 104);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
             ctx.fillStyle = '#05e0a3';
-            ctx.font = '800 104px Inter, sans-serif';
-            ctx.fillText(String(days), cx, 228);
+            ctx.font = '800 84px Inter, sans-serif';
+            ctx.fillText(String(days), cx, 192);
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = '700 27px Inter, sans-serif';
+            ctx.font = '700 23px Inter, sans-serif';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '3px';
-            ctx.fillText(days === 1 ? 'DIA PARA A' : 'DIAS PARA A', cx, 272);
+            ctx.fillText(days === 1 ? 'DIA PARA A' : 'DIAS PARA A', cx, 230);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
         }
 
         // logo wordmark (branco) centralizado abaixo
         if (logoReady) {
-            const lw = 344, lh = logo.height * (lw / logo.width);
-            const ly = days <= 0 ? 234 : 298;
+            const lw = 280, lh = logo.height * (lw / logo.width);
+            const ly = days <= 0 ? 200 : 256;
             ctx.shadowBlur = 10;
             ctx.drawImage(logo, cx - lw / 2, ly, lw, lh);
         }
@@ -442,13 +462,13 @@
         const startX = cx - (colW * n) / 2 + colW / 2;
         mts.forEach((mt, i) => {
             const x = startX + i * colW;
-            drawIcon(mt.icon, x, m.metricsIconCy, 25, '#05e0a3');
+            drawIcon(mt.icon, x, m.metricsIconCy, 21, '#05e0a3');
             ctx.textAlign = 'center';
             ctx.fillStyle = '#ffffff';
-            ctx.font = '800 48px Inter, sans-serif';
+            ctx.font = '800 40px Inter, sans-serif';
             ctx.fillText(mt.value, x, m.metricsValueY);
             ctx.fillStyle = '#ffffff';
-            ctx.font = '600 24px Inter, sans-serif';
+            ctx.font = '600 21px Inter, sans-serif';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '1px';
             ctx.fillText((mt.label || '').toUpperCase(), x, m.metricsLabelY);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
@@ -481,24 +501,24 @@
         ctx.fillStyle = '#ffffff';
         if (isWorkout) {
             // slogan da corrida (caixa alta) no lugar do nome do esporte
-            ctx.font = '800 60px Inter, sans-serif';
-            const sloganLines = wrap('A MINHA MAIOR VITÓRIA É A PRÓXIMA', 900);
+            ctx.font = '800 50px Inter, sans-serif';
+            const sloganLines = wrap('A MINHA MAIOR VITÓRIA É A PRÓXIMA', 880);
             sloganLines.forEach((ln, i) => {
-                ctx.fillText(ln, cx, m.titleY - (sloganLines.length - 1 - i) * 70);
+                ctx.fillText(ln, cx, m.titleY - (sloganLines.length - 1 - i) * 58);
             });
         } else if (isPeriod) {
             // "MEU CAMINHO ATÉ AQUI [EM UM MÊS]"
-            ctx.font = '800 58px Inter, sans-serif';
+            ctx.font = '800 48px Inter, sans-serif';
             const phrase = ('MEU CAMINHO ATÉ AQUI ' + (payload.phrase || '')).trim();
-            const lines = wrap(phrase, 900);
+            const lines = wrap(phrase, 880);
             lines.forEach((ln, i) => {
-                ctx.fillText(ln, cx, m.titleY - (lines.length - 1 - i) * 68);
+                ctx.fillText(ln, cx, m.titleY - (lines.length - 1 - i) * 56);
             });
         } else if (payload.type === 'medal') {
-            ctx.font = '800 100px Inter, sans-serif';
+            ctx.font = '800 84px Inter, sans-serif';
             ctx.fillText(payload.medalLabel, cx, m.titleY);
         } else {
-            ctx.font = '800 86px Inter, sans-serif';
+            ctx.font = '800 72px Inter, sans-serif';
             ctx.fillText(payload.title, cx, m.titleY);
         }
 
@@ -620,10 +640,11 @@
         ctx.fillStyle = tg; ctx.fillRect(0, 0, W, H * 0.42);
 
         // brilho da cor de acento atrás do bloco
-        const glow = ctx.createRadialGradient(cx, 1520, 40, cx, 1520, 660);
+        const gy = H * 0.79;
+        const glow = ctx.createRadialGradient(cx, gy, 40, cx, gy, 660);
         glow.addColorStop(0, color + '22');
         glow.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = glow; ctx.fillRect(0, 1000, W, H - 1000);
+        ctx.fillStyle = glow; ctx.fillRect(0, H * 0.52, W, H * 0.48);
 
         // cabeçalho do topo: regressiva (treino/resumo) ou "FINISHER" (medalha)
         if (payload.type === 'workout' || payload.type === 'period') drawCountdownTop(cx);
@@ -632,18 +653,34 @@
         // estilo "Completo": grade com todas as métricas
         if (payload.type === 'workout' && currentVariant() === 'full') {
             drawFullContent(cx, color);
+            drawHashtag(cx);
             return;
         }
 
         // estilo "Rota": desenha o traçado GPS na parte de cima, deslocado um
         // pouco pra esquerda (deixa o lado direito mais livre, ex: pra foto)
         if (payload.type === 'workout' && currentVariant() === 'route' && payload.route) {
-            drawRouteShape(payload.route, W * 0.22, 760, 330, 270, '#05e0a3');
+            drawRouteShape(payload.route, W * 0.22, H * 0.40, 330, 270, '#05e0a3');
         }
 
         // treino, medalha e resumo não têm rodapé -> ancora o bloco bem mais embaixo
         const clean = payload.type === 'workout' || payload.type === 'medal' || payload.type === 'period';
         drawContent(layout(clean ? H + 26 : H - 96));
+        drawHashtag(cx);
+    }
+
+    // hashtag pequena no rodapé do card (aparece na imagem postada)
+    function drawHashtag(cx) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = 'rgba(255,255,255,0.78)';
+        ctx.font = '700 24px Inter, sans-serif';
+        if ('letterSpacing' in ctx) ctx.letterSpacing = '1px';
+        ctx.fillText(HASHTAG, cx, H - 34);
+        if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+        ctx.restore();
     }
 
     async function render() {
@@ -743,6 +780,7 @@
         photoLabel.textContent = 'Adicionar foto';
         // modo transparente só faz sentido pra conquistas (sticker)
         transWrap.style.display = payload.type === 'badge' ? '' : 'none';
+        setFormat('story');  // sempre abre em 9:16; também reseta canvas.height
         syncControls();
         updateVariantNav();
         overlay.hidden = false;
