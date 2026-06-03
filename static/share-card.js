@@ -334,30 +334,30 @@
 
         if (days <= 0) {
             ctx.fillStyle = '#05e0a3';
-            ctx.font = '800 72px Inter, sans-serif';
-            ctx.fillText('É HOJE!', cx, 230);
+            ctx.font = '800 58px Inter, sans-serif';
+            ctx.fillText('É HOJE!', cx, 200);
         } else {
             ctx.fillStyle = '#e8eef7';
-            ctx.font = '700 32px Inter, sans-serif';
-            if ('letterSpacing' in ctx) ctx.letterSpacing = '6px';
-            ctx.fillText('FALTAM', cx, 140);
+            ctx.font = '700 26px Inter, sans-serif';
+            if ('letterSpacing' in ctx) ctx.letterSpacing = '5px';
+            ctx.fillText('FALTAM', cx, 120);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
             ctx.fillStyle = '#05e0a3';
-            ctx.font = '800 130px Inter, sans-serif';
-            ctx.fillText(String(days), cx, 272);
+            ctx.font = '800 104px Inter, sans-serif';
+            ctx.fillText(String(days), cx, 228);
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = '700 34px Inter, sans-serif';
-            if ('letterSpacing' in ctx) ctx.letterSpacing = '4px';
-            ctx.fillText(days === 1 ? 'DIA PARA A' : 'DIAS PARA A', cx, 326);
+            ctx.font = '700 27px Inter, sans-serif';
+            if ('letterSpacing' in ctx) ctx.letterSpacing = '3px';
+            ctx.fillText(days === 1 ? 'DIA PARA A' : 'DIAS PARA A', cx, 272);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
         }
 
         // logo wordmark (branco) centralizado abaixo
         if (logoReady) {
-            const lw = 430, lh = logo.height * (lw / logo.width);
-            const ly = days <= 0 ? 270 : 356;
+            const lw = 344, lh = logo.height * (lw / logo.width);
+            const ly = days <= 0 ? 234 : 298;
             ctx.shadowBlur = 10;
             ctx.drawImage(logo, cx - lw / 2, ly, lw, lh);
         }
@@ -472,9 +472,9 @@
         ctx.textAlign = 'center';
         ctx.fillStyle = '#ffffff';
         if (isWorkout) {
-            // slogan da corrida no lugar do nome do esporte (só temos corrida)
+            // slogan da corrida (caixa alta) no lugar do nome do esporte
             ctx.font = '800 60px Inter, sans-serif';
-            const sloganLines = wrap('A minha maior vitória é a próxima', 900);
+            const sloganLines = wrap('A MINHA MAIOR VITÓRIA É A PRÓXIMA', 900);
             sloganLines.forEach((ln, i) => {
                 ctx.fillText(ln, cx, m.titleY - (sloganLines.length - 1 - i) * 70);
             });
@@ -512,28 +512,27 @@
             drawMetricsRow(payload.metrics || [], m, color);
         }
 
-        // divisor
-        ctx.strokeStyle = 'rgba(148,163,184,0.28)';
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(cx - 220, m.divY); ctx.lineTo(cx + 220, m.divY); ctx.stroke();
-
-        // atleta (rodapé com mais destaque)
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '800 44px Inter, sans-serif';
-        ctx.fillText(ATHLETE, cx, m.athleteY);
-
-        // marca (logo pequeno + nome)
-        drawBrand(cx, m.brandY);
+        // rodapé (divisor + atleta + marca) — só em conquistas/resumo; no treino o
+        // card fica limpo (a marca já aparece grande na regressiva do topo)
+        if (!isWorkout) {
+            ctx.strokeStyle = 'rgba(148,163,184,0.28)';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(cx - 220, m.divY); ctx.lineTo(cx + 220, m.divY); ctx.stroke();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '800 44px Inter, sans-serif';
+            ctx.fillText(ATHLETE, cx, m.athleteY);
+            drawBrand(cx, m.brandY);
+        }
     }
 
     // estilo "Completo": grade com TODAS as métricas (base + extras do Strava)
     function drawFullContent(cx, color) {
         const all = (payload.metrics || []).concat(payload.extras || []);
-        const brandY = H - 96, athleteY = brandY - 56, divY = athleteY - 46;
+        const bottomAnchor = H - 44;  // sem rodapé: grade encosta mais embaixo
         const cols = 2, rowH = 150;
         const rows = Math.ceil(all.length / cols);
         const leftCx = cx - 235, rightCx = cx + 235;
-        const lastCellTop = divY - 60 - 92;
+        const lastCellTop = bottomAnchor - 92;
         const gridTop = lastCellTop - (rows - 1) * rowH;
 
         ctx.textAlign = 'center';
@@ -551,19 +550,13 @@
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
         });
 
-        // slogan no lugar do nome do esporte (sem ponto/data)
+        // slogan (caixa alta) no lugar do nome do esporte (sem ponto/data/rodapé)
         const titleY = gridTop - 66;
         ctx.fillStyle = '#ffffff'; ctx.font = '800 54px Inter, sans-serif';
-        const sloganLines = wrap('A minha maior vitória é a próxima', 900);
+        const sloganLines = wrap('A MINHA MAIOR VITÓRIA É A PRÓXIMA', 900);
         sloganLines.forEach((ln, i) => {
             ctx.fillText(ln, cx, titleY - (sloganLines.length - 1 - i) * 62);
         });
-
-        ctx.strokeStyle = 'rgba(148,163,184,0.28)'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(cx - 220, divY); ctx.lineTo(cx + 220, divY); ctx.stroke();
-        ctx.fillStyle = '#ffffff'; ctx.font = '800 44px Inter, sans-serif';
-        ctx.fillText(ATHLETE, cx, athleteY);
-        drawBrand(cx, brandY);
     }
 
     function draw() {
@@ -616,12 +609,12 @@
         og.addColorStop(1.00, 'rgba(4,7,15,0.99)');
         ctx.fillStyle = og; ctx.fillRect(0, 0, W, H);
 
-        // degradê no topo (escuro descendo) — dá leitura na regressiva, igual ao rodapé
-        const tg = ctx.createLinearGradient(0, 0, 0, H * 0.5);
+        // degradê no topo (escuro descendo) — dá leitura na regressiva
+        const tg = ctx.createLinearGradient(0, 0, 0, H * 0.42);
         tg.addColorStop(0.00, 'rgba(4,7,15,0.92)');
-        tg.addColorStop(0.30, 'rgba(6,12,28,0.50)');
+        tg.addColorStop(0.32, 'rgba(6,12,28,0.50)');
         tg.addColorStop(1.00, 'rgba(8,14,32,0)');
-        ctx.fillStyle = tg; ctx.fillRect(0, 0, W, H * 0.5);
+        ctx.fillStyle = tg; ctx.fillRect(0, 0, W, H * 0.42);
 
         // brilho da cor de acento atrás do bloco
         const glow = ctx.createRadialGradient(cx, 1520, 40, cx, 1520, 660);
@@ -644,7 +637,8 @@
             drawRouteShape(payload.route, W * 0.22, 760, 330, 270, '#05e0a3');
         }
 
-        drawContent(layout(H - 96));
+        // treino não tem rodapé -> ancora o bloco bem mais embaixo
+        drawContent(layout(payload.type === 'workout' ? H + 26 : H - 96));
     }
 
     async function render() {
