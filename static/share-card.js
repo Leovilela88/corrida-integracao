@@ -422,8 +422,8 @@
         ctx.shadowColor = color; ctx.shadowBlur = 20; ctx.stroke();
         ctx.shadowBlur = 0;
         const s = project(pts[0]), e = project(pts[pts.length - 1]);
-        ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(s[0], s[1], 11, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(e[0], e[1], 11, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(s[0], s[1], 9, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(e[0], e[1], 9, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
     }
 
@@ -434,7 +434,7 @@
         const startX = cx - (colW * n) / 2 + colW / 2;
         mts.forEach((mt, i) => {
             const x = startX + i * colW;
-            drawIcon(mt.icon, x, m.metricsIconCy, 25, '#ffffff');
+            drawIcon(mt.icon, x, m.metricsIconCy, 25, '#05e0a3');
             ctx.textAlign = 'center';
             ctx.fillStyle = '#ffffff';
             ctx.font = '800 48px Inter, sans-serif';
@@ -542,7 +542,7 @@
             const lastAlone = (i === all.length - 1) && (all.length % 2 === 1);
             const x = lastAlone ? cx : (c === 0 ? leftCx : rightCx);
             const top = gridTop + Math.floor(i / cols) * rowH;
-            drawIcon(mt.icon, x, top, 23, '#ffffff');
+            drawIcon(mt.icon, x, top, 23, '#05e0a3');
             ctx.fillStyle = '#ffffff'; ctx.font = '800 44px Inter, sans-serif';
             ctx.fillText(mt.value, x, top + 56);
             ctx.fillStyle = '#ffffff'; ctx.font = '600 23px Inter, sans-serif';
@@ -616,6 +616,13 @@
         og.addColorStop(1.00, 'rgba(4,7,15,0.99)');
         ctx.fillStyle = og; ctx.fillRect(0, 0, W, H);
 
+        // degradê no topo (escuro descendo) — dá leitura na regressiva, igual ao rodapé
+        const tg = ctx.createLinearGradient(0, 0, 0, H * 0.5);
+        tg.addColorStop(0.00, 'rgba(4,7,15,0.92)');
+        tg.addColorStop(0.30, 'rgba(6,12,28,0.50)');
+        tg.addColorStop(1.00, 'rgba(8,14,32,0)');
+        ctx.fillStyle = tg; ctx.fillRect(0, 0, W, H * 0.5);
+
         // brilho da cor de acento atrás do bloco
         const glow = ctx.createRadialGradient(cx, 1520, 40, cx, 1520, 660);
         glow.addColorStop(0, color + '22');
@@ -634,7 +641,7 @@
         // estilo "Rota": desenha o traçado GPS na parte de cima, deslocado um
         // pouco pra esquerda (deixa o lado direito mais livre, ex: pra foto)
         if (payload.type === 'workout' && currentVariant() === 'route' && payload.route) {
-            drawRouteShape(payload.route, W * 0.32, 720, 660, 540, color);
+            drawRouteShape(payload.route, W * 0.22, 760, 330, 270, '#05e0a3');
         }
 
         drawContent(layout(H - 96));
