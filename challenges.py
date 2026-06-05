@@ -79,7 +79,7 @@ ALL_BY_CODE = {**CHALLENGES_BY_CODE, **{e.code: e for e in EVENT_CHALLENGES}}
 
 def period_key(period: str, today: date) -> str:
     if period == "event":
-        return "integracao-2026"
+        return "evt-2026"  # cabe em VARCHAR(12) do Postgres
     if period == "month":
         return today.strftime("%Y-%m")
     iso = today.isocalendar()
