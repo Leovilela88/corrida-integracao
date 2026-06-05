@@ -37,17 +37,17 @@
         ctx.shadowBlur = 14;
         ctx.shadowOffsetY = 2;
         ctx.fillStyle = '#e8eef7';
-        ctx.font = '700 22px Inter, sans-serif';
+        ctx.font = '700 19px Inter, sans-serif';
         if ('letterSpacing' in ctx) ctx.letterSpacing = '5px';
-        ctx.fillText('EU SOU', cx, 104);
+        ctx.fillText('EU SOU', cx, 92);
         if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
         ctx.fillStyle = '#05e0a3';
-        ctx.font = '800 76px Inter, sans-serif';
-        ctx.fillText('FINISHER', cx, 180);
+        ctx.font = '800 64px Inter, sans-serif';
+        ctx.fillText('FINISHER', cx, 156);
         if (logoReady) {
-            const lw = 280, lh = logo.height * (lw / logo.width);
+            const lw = 238, lh = logo.height * (lw / logo.width);
             ctx.shadowBlur = 10;
-            ctx.drawImage(logo, cx - lw / 2, 212, lw, lh);
+            ctx.drawImage(logo, cx - lw / 2, 184, lw, lh);
         }
         ctx.restore();
     }
@@ -370,30 +370,30 @@
 
         if (days <= 0) {
             ctx.fillStyle = '#05e0a3';
-            ctx.font = '800 48px Inter, sans-serif';
-            ctx.fillText('É HOJE!', cx, 172);
+            ctx.font = '800 40px Inter, sans-serif';
+            ctx.fillText('É HOJE!', cx, 150);
         } else {
             ctx.fillStyle = '#e8eef7';
-            ctx.font = '700 22px Inter, sans-serif';
+            ctx.font = '700 19px Inter, sans-serif';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '4px';
-            ctx.fillText('FALTAM', cx, 104);
+            ctx.fillText('FALTAM', cx, 92);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
             ctx.fillStyle = '#05e0a3';
-            ctx.font = '800 84px Inter, sans-serif';
-            ctx.fillText(String(days), cx, 192);
+            ctx.font = '800 72px Inter, sans-serif';
+            ctx.fillText(String(days), cx, 166);
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = '700 23px Inter, sans-serif';
+            ctx.font = '700 20px Inter, sans-serif';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '3px';
-            ctx.fillText(days === 1 ? 'DIA PARA A' : 'DIAS PARA A', cx, 230);
+            ctx.fillText(days === 1 ? 'DIA PARA A' : 'DIAS PARA A', cx, 200);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
         }
 
         // logo wordmark (branco) centralizado abaixo
         if (logoReady) {
-            const lw = 280, lh = logo.height * (lw / logo.width);
-            const ly = days <= 0 ? 200 : 256;
+            const lw = 238, lh = logo.height * (lw / logo.width);
+            const ly = days <= 0 ? 176 : 224;
             ctx.shadowBlur = 10;
             ctx.drawImage(logo, cx - lw / 2, ly, lw, lh);
         }
@@ -470,13 +470,13 @@
         const startX = cx - (colW * n) / 2 + colW / 2;
         mts.forEach((mt, i) => {
             const x = startX + i * colW;
-            drawIcon(mt.icon, x, m.metricsIconCy, 21, '#05e0a3');
+            drawIcon(mt.icon, x, m.metricsIconCy, 18, '#05e0a3');
             ctx.textAlign = 'center';
             ctx.fillStyle = '#ffffff';
-            ctx.font = '800 40px Inter, sans-serif';
+            ctx.font = '800 34px Inter, sans-serif';
             ctx.fillText(mt.value, x, m.metricsValueY);
             ctx.fillStyle = '#ffffff';
-            ctx.font = '600 21px Inter, sans-serif';
+            ctx.font = '600 18px Inter, sans-serif';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '1px';
             ctx.fillText((mt.label || '').toUpperCase(), x, m.metricsLabelY);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
@@ -509,24 +509,24 @@
         ctx.fillStyle = '#ffffff';
         if (isWorkout) {
             // slogan da corrida (caixa alta) no lugar do nome do esporte
-            ctx.font = '800 50px Inter, sans-serif';
-            const sloganLines = wrap('A MINHA MAIOR VITÓRIA É A PRÓXIMA', 880);
+            ctx.font = '800 42px Inter, sans-serif';
+            const sloganLines = wrap('A MINHA MAIOR VITÓRIA É A PRÓXIMA', 860);
             sloganLines.forEach((ln, i) => {
-                ctx.fillText(ln, cx, m.titleY - (sloganLines.length - 1 - i) * 58);
+                ctx.fillText(ln, cx, m.titleY - (sloganLines.length - 1 - i) * 50);
             });
         } else if (isPeriod) {
             // "MEU CAMINHO ATÉ AQUI [EM UM MÊS]"
-            ctx.font = '800 48px Inter, sans-serif';
+            ctx.font = '800 41px Inter, sans-serif';
             const phrase = ('MEU CAMINHO ATÉ AQUI ' + (payload.phrase || '')).trim();
-            const lines = wrap(phrase, 880);
+            const lines = wrap(phrase, 860);
             lines.forEach((ln, i) => {
-                ctx.fillText(ln, cx, m.titleY - (lines.length - 1 - i) * 56);
+                ctx.fillText(ln, cx, m.titleY - (lines.length - 1 - i) * 48);
             });
         } else if (payload.type === 'medal') {
-            ctx.font = '800 84px Inter, sans-serif';
+            ctx.font = '800 72px Inter, sans-serif';
             ctx.fillText(payload.medalLabel, cx, m.titleY);
         } else {
-            ctx.font = '800 72px Inter, sans-serif';
+            ctx.font = '800 62px Inter, sans-serif';
             ctx.fillText(payload.title, cx, m.titleY);
         }
 
@@ -691,19 +691,19 @@
 
         // hashtag (linha mais baixa)
         ctx.fillStyle = 'rgba(255,255,255,0.78)';
-        ctx.font = '700 24px Inter, sans-serif';
+        ctx.font = '700 20px Inter, sans-serif';
         if ('letterSpacing' in ctx) ctx.letterSpacing = '1px';
         ctx.fillText(HASHTAG, cx, fb);
         if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
         // faixa de logos
-        const logoH = 38;
-        const logosBaseline = fb - 52;             // base dos logos
-        const labelY = logosBaseline - logoH - 12; // rótulos acima
+        const logoH = 32;
+        const logosBaseline = fb - 46;             // base dos logos
+        const labelY = logosBaseline - logoH - 10; // rótulos acima
         const colL = W * 0.31, colR = W * 0.69;
 
         ctx.fillStyle = 'rgba(255,255,255,0.55)';
-        ctx.font = '700 17px Inter, sans-serif';
+        ctx.font = '700 15px Inter, sans-serif';
         if ('letterSpacing' in ctx) ctx.letterSpacing = '2px';
         ctx.fillText('REALIZAÇÃO', colL, labelY);
         ctx.fillText('PATROCÍNIO', colR, labelY);
