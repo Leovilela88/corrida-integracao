@@ -160,12 +160,20 @@
             .join('');
     }
 
-    // ---------------------------------------------------------------- logo
+    // ---------------------------------------------------------------- logos
     const logo = new Image();
     logo.crossOrigin = 'anonymous';
     let logoReady = false;
     logo.onload = () => { logoReady = true; if (overlay && !overlay.hidden) render(); };
     logo.src = '/static/INTEGRACAO_LOGO.png';
+
+    // logos de realização (Grupo EP) e patrocínio (Covabra) — rodapé do card
+    const epLogo = new Image(); epLogo.crossOrigin = 'anonymous'; let epReady = false;
+    epLogo.onload = () => { epReady = true; if (overlay && !overlay.hidden) render(); };
+    epLogo.src = '/static/logo_grupo_ep.png';
+    const spLogo = new Image(); spLogo.crossOrigin = 'anonymous'; let spReady = false;
+    spLogo.onload = () => { spReady = true; if (overlay && !overlay.hidden) render(); };
+    spLogo.src = '/static/logo_covabra.png';
 
     document.fonts && document.fonts.ready.then(() => {
         if (overlay && !overlay.hidden) render();
@@ -650,23 +658,67 @@
         if (payload.type === 'workout' || payload.type === 'period') drawCountdownTop(cx);
         else if (payload.type === 'medal') drawMedalTop(cx);
 
-        // estilo "Completo": grade com todas as métricas
-        if (payload.type === 'workout' && currentVariant() === 'full') {
-            drawFullContent(cx, color);
-            drawHashtag(cx);
-            return;
-        }
-
         // estilo "Rota": desenha o traçado GPS na parte de cima, deslocado um
         // pouco pra esquerda (deixa o lado direito mais livre, ex: pra foto)
         if (payload.type === 'workout' && currentVariant() === 'route' && payload.route) {
             drawRouteShape(payload.route, W * 0.22, H * 0.40, 330, 270, '#05e0a3');
         }
 
-        // treino, medalha e resumo não têm rodapé -> ancora o bloco bem mais embaixo
+        // treino, medalha e resumo: bloco ancorado acima do rodapé de logos
         const clean = payload.type === 'workout' || payload.type === 'medal' || payload.type === 'period';
-        drawContent(layout(clean ? H + 26 : H - 96));
-        drawHashtag(cx);
+        if (clean) {
+            drawContent(layout(footerSafeBottom() + 18));
+            drawFooter(cx);
+        } else {
+            drawContent(layout(H - 96));
+            drawHashtag(cx);
+        }
+    }
+
+    // Limite inferior seguro: no Stories o Instagram cobre ~250px de baixo;
+    // no Feed 4:5 a imagem aparece quase inteira.
+    function footerSafeBottom() {
+        return fmt === 'story' ? H - 250 : H - 56;
+    }
+
+    // Rodapé: realização (Grupo EP) + patrocínio (Covabra) + hashtag
+    function drawFooter(cx) {
+        const fb = footerSafeBottom();
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 8;
+
+        // hashtag (linha mais baixa)
+        ctx.fillStyle = 'rgba(255,255,255,0.78)';
+        ctx.font = '700 24px Inter, sans-serif';
+        if ('letterSpacing' in ctx) ctx.letterSpacing = '1px';
+        ctx.fillText(HASHTAG, cx, fb);
+        if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+
+        // faixa de logos
+        const logoH = 38;
+        const logosBaseline = fb - 52;             // base dos logos
+        const labelY = logosBaseline - logoH - 12; // rótulos acima
+        const colL = W * 0.31, colR = W * 0.69;
+
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        ctx.font = '700 17px Inter, sans-serif';
+        if ('letterSpacing' in ctx) ctx.letterSpacing = '2px';
+        ctx.fillText('REALIZAÇÃO', colL, labelY);
+        ctx.fillText('PATROCÍNIO', colR, labelY);
+        if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+
+        ctx.shadowBlur = 6;
+        if (epReady) {
+            const w = logoH * (epLogo.width / epLogo.height);
+            ctx.drawImage(epLogo, colL - w / 2, logosBaseline - logoH, w, logoH);
+        }
+        if (spReady) {
+            const w = logoH * (spLogo.width / spLogo.height);
+            ctx.drawImage(spLogo, colR - w / 2, logosBaseline - logoH, w, logoH);
+        }
+        ctx.restore();
     }
 
     // hashtag pequena no rodapé do card (aparece na imagem postada)
