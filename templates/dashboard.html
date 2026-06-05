@@ -51,12 +51,12 @@
 </section>
 
 <script>
-    // Clicar numa linha de "Últimas atividades" abre o detalhe (exceto ações/links)
-    document.querySelectorAll('tr.row-link').forEach(function (tr) {
-        tr.addEventListener('click', function (e) {
-            if (e.target.closest('.row-actions, a, button, form, input, label')) return;
-            window.location.href = tr.dataset.href;
-        });
+    // Clicar numa linha de "Últimas atividades" abre o detalhe (exceto ações/links).
+    // Delegação no document: funciona mesmo este script rodando antes da tabela.
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('.row-actions, a, button, form, input, label')) return;
+        const tr = e.target.closest('tr.row-link');
+        if (tr && tr.dataset.href) window.location.href = tr.dataset.href;
     });
 
     // Contagem regressiva da prova
