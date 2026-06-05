@@ -432,6 +432,32 @@ def finisher_medals(db: Session, athlete_id: int) -> list:
     return out
 
 
+# Medalhas de desafio (voos): combinação de duas provas
+FLIGHT_MEDALS = [
+    {"code": "voo_curto", "label": "Voo Curto", "legs": ["5K", "10K"],
+     "desc": "5K no sábado + 10K no domingo"},
+    {"code": "voo_longo", "label": "Voo Longo", "legs": ["5K", "21K"],
+     "desc": "5K no sábado + 21K no domingo"},
+]
+
+
+def flight_medals(db: Session, athlete_id: int) -> list:
+    """Medalhas dos desafios Voo Curto/Longo: desbloqueiam quando o atleta tem
+    finisher das duas distâncias do combo."""
+    by_label = {m["label"]: m for m in finisher_medals(db, athlete_id)}
+    out = []
+    for fm in FLIGHT_MEDALS:
+        legs = [by_label.get(lbl, {"label": lbl, "earned": False}) for lbl in fm["legs"]]
+        earned = all(l.get("earned") for l in legs)
+        out.append({
+            "code": fm["code"], "label": fm["label"], "desc": fm["desc"],
+            "legs": [{"label": l["label"], "earned": l.get("earned", False),
+                      "time": l.get("time")} for l in legs],
+            "earned": earned,
+        })
+    return out
+
+
 def _fmt_time(minutes: float) -> str:
     """Minutos decimais -> H:MM:SS ou MM:SS."""
     total = int(round(minutes * 60))

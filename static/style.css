@@ -2588,3 +2588,14 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
 .share-zoom input[type="range"]::-moz-range-thumb {
     width: 20px; height: 20px; border-radius: 50%; background: var(--green); cursor: pointer; border: 2px solid #04132f;
 }
+
+/* Medalhas dos voos (combos) */
+.flight-legs { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 6px; }
+.flight-leg {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.78rem; font-weight: 700;
+    color: var(--muted-2); background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-strong); border-radius: 8px; padding: 4px 9px;
+}
+.flight-leg.is-ok { color: var(--green); background: rgba(5,224,163,0.12); border-color: rgba(5,224,163,0.35); }
+.flight-leg svg { width: 13px; height: 13px; }

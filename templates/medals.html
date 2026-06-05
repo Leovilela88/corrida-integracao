@@ -10,6 +10,7 @@
 </section>
 
 <section class="panel-section">
+    <div class="section-head"><h2>Distâncias</h2></div>
     <div class="medal-grid">
         {% for med in medals %}
         <article class="medal-card {% if med.earned %}is-earned{% endif %}">
@@ -36,4 +37,41 @@
         {% endfor %}
     </div>
 </section>
+
+{% if flights %}
+<section class="panel-section">
+    <div class="section-head">
+        <h2>Desafios</h2>
+        <span class="section-sub">medalhas especiais dos voos</span>
+    </div>
+    <div class="medal-grid">
+        {% for fm in flights %}
+        <article class="medal-card {% if fm.earned %}is-earned{% endif %}">
+            <div class="medal-disc">
+                {% if fm.earned %}{{ bicon('medal') }}{% else %}{{ bicon('flag') }}{% endif %}
+                <span class="medal-dist">{{ fm.label }}</span>
+            </div>
+            <div class="medal-body">
+                <div class="flight-legs">
+                    {% for leg in fm.legs %}
+                    <span class="flight-leg {% if leg.earned %}is-ok{% endif %}">
+                        {% if leg.earned %}{{ bicon('check') }}{% else %}{{ bicon('flag') }}{% endif %} {{ leg.label }}
+                    </span>
+                    {% endfor %}
+                </div>
+                <div class="medal-meta">{{ fm.desc }}</div>
+            </div>
+            {% if fm.earned %}
+            <button type="button" class="btn-share-cta" data-mf-share='{{ fm.share|tojson }}'>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Compartilhar medalha
+            </button>
+            {% else %}
+            <p class="medal-locked">Conclua as duas provas para desbloquear.</p>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 {% endblock %}

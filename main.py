@@ -1913,8 +1913,22 @@ def medals_page(request: Request, db: Session = Depends(get_db)):
                     {"icon": "pace", "value": med["pace"] + "/km", "label": "pace"},
                 ],
             }
+    # medalhas dos voos (combos 5K+10K / 5K+21K)
+    flights = stats.flight_medals(db, athlete.id)
+    for fm in flights:
+        if fm["earned"]:
+            fm["share"] = {
+                "type": "medal",
+                "medalLabel": fm["label"].upper(),
+                "color": "#05e0a3",
+                "metrics": [
+                    {"icon": "distance", "value": leg["time"] or "✓", "label": leg["label"]}
+                    for leg in fm["legs"]
+                ],
+            }
     return templates.TemplateResponse(
-        "medals.html", {"request": request, "athlete": athlete, "medals": medals}
+        "medals.html",
+        {"request": request, "athlete": athlete, "medals": medals, "flights": flights},
     )
 
 
