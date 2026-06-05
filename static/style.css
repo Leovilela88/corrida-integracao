@@ -2573,3 +2573,18 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
 .fmt-btn.is-active { background: var(--green); color: var(--on-green); border-color: var(--green); }
 .share-tag-hint { text-align: center; margin: 12px 0 0; color: var(--text-2); font-size: 0.85rem; }
 .share-tag-hint strong { color: var(--green); }
+
+/* Slider de zoom da foto no card de compartilhamento */
+.share-zoom { display: flex; align-items: center; gap: 10px; margin: 6px 2px 2px; }
+.share-zoom .zoom-ico { color: var(--muted); font-weight: 800; font-size: 1.1rem; width: 16px; text-align: center; }
+.share-zoom input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 999px;
+    background: var(--border-strong); outline: none;
+}
+.share-zoom input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--green); cursor: pointer; border: 2px solid #04132f;
+}
+.share-zoom input[type="range"]::-moz-range-thumb {
+    width: 20px; height: 20px; border-radius: 50%; background: var(--green); cursor: pointer; border: 2px solid #04132f;
+}

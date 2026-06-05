@@ -16,6 +16,7 @@
     // ---------------------------------------------------------------- estado
     let payload = null;       // { type, ... }
     let photoImg = null;      // Image da foto escolhida (ou null)
+    let photoZoom = 1;        // zoom da foto (1 = cobre o quadro)
     let transparent = false;  // só a base da conquista, fundo transparente
     let offX = 0, offY = 0;   // deslocamento da foto (espaço do canvas)
     let variants = ['default'];
@@ -55,7 +56,7 @@
 
     // ---------------------------------------------------------------- DOM
     let overlay, canvas, ctx, fileInput, photoBtn, photoLabel, transWrap,
-        transInput, dragHint, variantNav, variantDots, variantLabel;
+        transInput, dragHint, zoomWrap, zoomInput, variantNav, variantDots, variantLabel;
 
     function buildSheet() {
         overlay = document.createElement('div');
@@ -79,7 +80,12 @@
                     <button type="button" class="fmt-btn is-active" data-fmt="story">Stories 9:16</button>
                     <button type="button" class="fmt-btn" data-fmt="feed">Feed 4:5</button>
                 </div>
-                <p class="share-hint" data-role="drag" hidden>Arraste a foto para posicionar</p>
+                <p class="share-hint" data-role="drag" hidden>Arraste a foto para posicionar · use o zoom abaixo</p>
+                <div class="share-zoom" data-role="zoom-wrap" hidden>
+                    <span class="zoom-ico">−</span>
+                    <input type="range" min="100" max="300" value="100" step="1" data-role="zoom" />
+                    <span class="zoom-ico">+</span>
+                </div>
                 <label class="share-toggle">
                     <input type="checkbox" data-role="trans" />
                     <span>Fundo transparente (sticker para Stories)</span>
@@ -107,6 +113,8 @@
         transWrap = overlay.querySelector('.share-toggle');
         transInput = overlay.querySelector('[data-role="trans"]');
         dragHint = overlay.querySelector('[data-role="drag"]');
+        zoomWrap = overlay.querySelector('[data-role="zoom-wrap"]');
+        zoomInput = overlay.querySelector('[data-role="zoom"]');
         variantNav = overlay.querySelector('[data-role="variants"]');
         variantDots = overlay.querySelector('[data-role="dots"]');
         variantLabel = overlay.querySelector('[data-role="variant-label"]');
@@ -125,6 +133,10 @@
         overlay.querySelectorAll('.fmt-btn').forEach((b) => {
             b.addEventListener('click', () => setFormat(b.dataset.fmt));
         });
+        zoomInput.addEventListener('input', () => {
+            photoZoom = Math.max(1, zoomInput.value / 100);
+            draw();
+        });
         bindDrag();
     }
 
@@ -141,6 +153,7 @@
         const showPhoto = !transparent;
         photoBtn.style.display = showPhoto ? '' : 'none';
         dragHint.hidden = !(showPhoto && photoImg);
+        zoomWrap.hidden = !(showPhoto && photoImg);
     }
 
     function changeVariant(dir) {
@@ -204,10 +217,11 @@
     }
 
     function coverDraw(img) {
-        const r = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+        // escala base = cobre o quadro; multiplicada pelo zoom do usuário
+        const r = Math.max(W / img.naturalWidth, H / img.naturalHeight) * photoZoom;
         const w = img.naturalWidth * r, h = img.naturalHeight * r;
         const x0 = (W - w) / 2, y0 = (H - h) / 2;
-        // clampa o deslocamento pra foto sempre cobrir o quadro
+        // clampa o deslocamento pra foto sempre cobrir o quadro (nas duas direções)
         offX = Math.min(0 - x0, Math.max(W - w - x0, offX));
         offY = Math.min(0 - y0, Math.max(H - h - y0, offY));
         ctx.drawImage(img, x0 + offX, y0 + offY, w, h);
@@ -746,7 +760,8 @@
         if (!f) return;
         const img = new Image();
         img.onload = () => {
-            photoImg = img; offX = 0; offY = 0;
+            photoImg = img; offX = 0; offY = 0; photoZoom = 1;
+            if (zoomInput) zoomInput.value = 100;
             photoLabel.textContent = 'Trocar foto';
             syncControls();
             render();
@@ -824,7 +839,8 @@
     function open(data) {
         if (!overlay) buildSheet();
         payload = data;
-        photoImg = null; offX = 0; offY = 0; transparent = false;
+        photoImg = null; offX = 0; offY = 0; transparent = false; photoZoom = 1;
+        if (zoomInput) zoomInput.value = 100;
         variants = variantsFor(payload);
         variantIdx = 0;
         fileInput.value = '';
