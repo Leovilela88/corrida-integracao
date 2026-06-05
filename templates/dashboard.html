@@ -51,6 +51,14 @@
 </section>
 
 <script>
+    // Clicar numa linha de "Últimas atividades" abre o detalhe (exceto ações/links)
+    document.querySelectorAll('tr.row-link').forEach(function (tr) {
+        tr.addEventListener('click', function (e) {
+            if (e.target.closest('.row-actions, a, button, form, input, label')) return;
+            window.location.href = tr.dataset.href;
+        });
+    });
+
     // Contagem regressiva da prova
     (function () {
         const el = document.getElementById('countdown');
@@ -459,7 +467,7 @@
                 </thead>
                 <tbody>
                 {% for w in recent %}
-                <tr>
+                <tr class="row-link" data-href="/treino/{{ w.id }}">
                     <td>{{ w.date.strftime('%d/%m') }}</td>
                     <td>
                         {% if w.sport == 'corrida' %}<span class="tag tag-run">Corrida</span>
