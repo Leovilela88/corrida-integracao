@@ -920,6 +920,8 @@ def dashboard(
     _ch_joined = {(j.code, j.period_key) for j in _ch_joins}
     _ch_data = challenges.build(db, athlete.id, today, _ch_joined)
     active_challenges = [it for it in (_ch_data["weekly"] + _ch_data["monthly"]) if it["joined"]]
+    # desafios da prova (Voo Curto/Longo) aceitos
+    active_event_challenges = [it for it in challenges.build_event(_ch_joined) if it["joined"]]
     pace_run = stats.pace_trend(db, athlete.id, today, "corrida")
     pace_swim = stats.pace_trend(db, athlete.id, today, "natacao")
     insights = stats.insights(db, athlete.id, today)
@@ -963,6 +965,7 @@ def dashboard(
             "streak": streak,
             "has_any_workout": has_any_workout,
             "active_challenges": active_challenges,
+            "active_event_challenges": active_event_challenges,
             "strava_configured": strava_api.is_configured(),
             "strava_connected": bool(athlete.strava_access_token),
             "comparison": comparison,

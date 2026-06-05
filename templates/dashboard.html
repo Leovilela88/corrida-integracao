@@ -231,9 +231,31 @@
         <h2>Desafios</h2>
         <a class="btn-primary btn-small" href="/desafios">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-            {% if active_challenges %}Ver desafios{% else %}Aceitar um desafio{% endif %}
+            {% if active_challenges or active_event_challenges %}Ver desafios{% else %}Aceitar um desafio{% endif %}
         </a>
     </div>
+
+    {% if active_event_challenges %}
+    <div class="challenge-grid" style="margin-bottom: 14px;">
+        {% for it in active_event_challenges %}
+        {% set ch = it.ch %}
+        <article class="challenge-card challenge-event is-accepted">
+            <div class="challenge-head">
+                <span class="challenge-icon challenge-icon-logo"><img src="/static/icon-512.v3.png" alt="Corrida Integração" /></span>
+                <div class="challenge-title">
+                    <strong>{{ ch.title }}</strong>
+                    <span class="challenge-sub">41ª Corrida Integração</span>
+                </div>
+                <span class="challenge-badge">{{ bicon('check') }} Aceito</span>
+            </div>
+            <ul class="event-legs">
+                {% for leg in ch.legs %}<li>{{ bicon('flag') }} {{ leg }}</li>{% endfor %}
+            </ul>
+        </article>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     {% if active_challenges %}
     <div class="goals-mini">
         {% for it in active_challenges %}
@@ -249,7 +271,7 @@
         </div>
         {% endfor %}
     </div>
-    {% else %}
+    {% elif not active_event_challenges %}
     <p class="empty">Topa um desafio? Correr 100&nbsp;km no mês, 25&nbsp;km na semana… <a href="/desafios">aceite um</a> e veja a barra encher conforme você treina.</p>
     {% endif %}
 </section>
