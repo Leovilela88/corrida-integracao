@@ -2616,3 +2616,18 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
     background: rgba(5,224,163,0.1); border: 1px solid rgba(5,224,163,0.3);
     border-radius: 12px; padding: 16px;
 }
+
+/* Autocomplete de amigos */
+.ac-wrap { position: relative; }
+.ac-list {
+    position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 20;
+    background: var(--panel-2); border: 1px solid var(--border-strong);
+    border-radius: 10px; overflow: hidden; box-shadow: var(--shadow);
+}
+.ac-item {
+    display: flex; flex-direction: column; gap: 1px; width: 100%; text-align: left;
+    background: transparent; border: none; cursor: pointer; padding: 10px 14px; color: var(--text);
+}
+.ac-item:hover { background: var(--panel-hover); }
+.ac-item strong { font-size: 0.95rem; font-weight: 600; }
+.ac-item span { font-size: 0.8rem; color: var(--green); }

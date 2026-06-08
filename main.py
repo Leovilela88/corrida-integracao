@@ -466,6 +466,23 @@ def _find_by_username(db: Session, uname: str):
     return db.query(Athlete).filter(func.lower(Athlete.username) == u).first()
 
 
+@app.get("/amigos/sugestoes")
+def friends_suggest(request: Request, q: str = "", db: Session = Depends(get_db)):
+    """Autocomplete: atletas cujo usuário ou nome contém o termo digitado."""
+    me = get_active_athlete(request, db)
+    term = (q or "").strip().lstrip("@").lower()
+    if len(term) < 2:
+        return []
+    like = f"%{term}%"
+    rows = (
+        db.query(Athlete)
+        .filter(Athlete.username.isnot(None), Athlete.id != me.id,
+                func.lower(Athlete.username).like(like) | func.lower(Athlete.name).like(like))
+        .order_by(Athlete.username).limit(8).all()
+    )
+    return [{"username": a.username, "name": a.name} for a in rows]
+
+
 @app.post("/amigos/buscar", response_class=HTMLResponse)
 def friends_lookup(request: Request, username: str = Form(...), db: Session = Depends(get_db)):
     """Procura pelo nome de usuário e mostra o NOME pra confirmar antes do pedido."""

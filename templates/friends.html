@@ -40,15 +40,55 @@
         </div>
     </div>
     {% else %}
-    <form method="post" action="/amigos/buscar">
+    <form method="post" action="/amigos/buscar" id="friend-form">
         <label>
             <span>Nome de usuário do amigo</span>
-            <input type="text" name="username" required maxlength="40" placeholder="ex: leo" autocapitalize="none" autocorrect="off" autocomplete="off" />
+            <div class="ac-wrap">
+                <input type="text" name="username" id="friend-input" required maxlength="40"
+                       placeholder="digite o nome ou usuário…" autocapitalize="none"
+                       autocorrect="off" autocomplete="off" />
+                <div class="ac-list" id="friend-ac" hidden></div>
+            </div>
         </label>
         <div class="actions">
             <button type="submit" class="btn-primary">Buscar</button>
         </div>
     </form>
+    <script>
+        (function () {
+            const input = document.getElementById('friend-input');
+            const box = document.getElementById('friend-ac');
+            const form = document.getElementById('friend-form');
+            if (!input) return;
+            let timer;
+            input.addEventListener('input', () => {
+                clearTimeout(timer);
+                const q = input.value.trim();
+                if (q.length < 2) { box.hidden = true; box.innerHTML = ''; return; }
+                timer = setTimeout(async () => {
+                    try {
+                        const r = await fetch('/amigos/sugestoes?q=' + encodeURIComponent(q));
+                        const items = await r.json();
+                        if (!items.length) { box.hidden = true; box.innerHTML = ''; return; }
+                        box.innerHTML = items.map(it =>
+                            `<button type="button" class="ac-item" data-u="${it.username}">`
+                            + `<strong>${it.name}</strong><span>@${it.username}</span></button>`).join('');
+                        box.hidden = false;
+                    } catch (_) { box.hidden = true; }
+                }, 200);
+            });
+            box.addEventListener('click', (e) => {
+                const b = e.target.closest('.ac-item');
+                if (!b) return;
+                input.value = b.dataset.u;
+                box.hidden = true;
+                form.submit();
+            });
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.ac-wrap')) box.hidden = true;
+            });
+        })();
+    </script>
     {% endif %}
 </section>
 
