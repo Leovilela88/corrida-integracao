@@ -2599,3 +2599,20 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
 }
 .flight-leg.is-ok { color: var(--green); background: rgba(5,224,163,0.12); border-color: rgba(5,224,163,0.35); }
 .flight-leg svg { width: 13px; height: 13px; }
+
+/* Dia de evento no calendário (Integramóvel etc) */
+.cal-day.cal-event {
+    position: relative; color: var(--on-green); font-weight: 800;
+    background: var(--green); border: 1px solid var(--green); cursor: pointer;
+}
+.cal-event-ico {
+    position: absolute; top: -6px; right: -6px; width: 16px; height: 16px;
+    background: #f59e0b; color: #1a1205; border-radius: 50%;
+    font-size: 11px; font-weight: 900; line-height: 16px; text-align: center;
+    box-shadow: 0 0 0 2px var(--bg);
+}
+.event-note {
+    margin: 0; font-size: 1rem; line-height: 1.5; color: var(--text);
+    background: rgba(5,224,163,0.1); border: 1px solid rgba(5,224,163,0.3);
+    border-radius: 12px; padding: 16px;
+}

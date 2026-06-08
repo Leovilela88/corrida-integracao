@@ -365,7 +365,11 @@
                 {% for week in month.weeks %}
                 {% for cell in week %}
                 {% if cell %}
-                {% if cell.count %}
+                {% if cell.iso == cal_event.date %}
+                <button type="button" class="cal-day cal-event {% if cell.is_today %}cal-today{% endif %}"
+                        data-event-msg="{{ cal_event.msg }}" data-event-date="{{ cell.iso }}"
+                        title="Evento — toque para ver">{{ cell.day }}<span class="cal-event-ico">!</span></button>
+                {% elif cell.count %}
                 <button type="button" class="cal-day cal-l{{ cell.level }} cal-has {% if cell.is_today %}cal-today{% endif %}"
                         data-date="{{ cell.iso }}"
                         title="{{ cell.count }} treino{{ 's' if cell.count != 1 else '' }} — toque para ver">{{ cell.day }}</button>
@@ -438,6 +442,14 @@
 
         document.querySelectorAll('.cal-day[data-date]').forEach((el) => {
             el.addEventListener('click', () => open(el.dataset.date));
+        });
+        // dia de evento: mostra a mensagem no mesmo modal
+        document.querySelectorAll('.cal-day[data-event-msg]').forEach((el) => {
+            el.addEventListener('click', () => {
+                title.textContent = 'Evento · ' + fmtDate(el.dataset.eventDate);
+                list.innerHTML = '<p class="event-note">' + el.dataset.eventMsg + '</p>';
+                modal.hidden = false;
+            });
         });
         closeBtn.addEventListener('click', close);
         modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
