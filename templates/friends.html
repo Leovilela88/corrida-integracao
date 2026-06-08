@@ -40,13 +40,14 @@
         </div>
     </div>
     {% else %}
-    <form method="post" action="/amigos/buscar" id="friend-form">
+    <form method="post" action="/amigos/buscar" id="friend-form" autocomplete="off">
         <label>
             <span>Nome de usuário do amigo</span>
             <div class="ac-wrap">
-                <input type="text" name="username" id="friend-input" required maxlength="40"
-                       placeholder="digite o nome ou usuário…" autocapitalize="none"
-                       autocorrect="off" autocomplete="off" />
+                <input type="search" name="q" id="friend-input" required maxlength="40"
+                       placeholder="digite o nome ou usuário…" autocapitalize="off"
+                       autocorrect="off" autocomplete="off" spellcheck="false"
+                       data-1p-ignore data-lpignore="true" inputmode="search" />
                 <div class="ac-list" id="friend-ac" hidden></div>
             </div>
         </label>

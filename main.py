@@ -484,10 +484,10 @@ def friends_suggest(request: Request, q: str = "", db: Session = Depends(get_db)
 
 
 @app.post("/amigos/buscar", response_class=HTMLResponse)
-def friends_lookup(request: Request, username: str = Form(...), db: Session = Depends(get_db)):
+def friends_lookup(request: Request, q: str = Form(...), db: Session = Depends(get_db)):
     """Procura pelo nome de usuário e mostra o NOME pra confirmar antes do pedido."""
     me = get_active_athlete(request, db)
-    target = _find_by_username(db, username)
+    target = _find_by_username(db, q)
     if not target:
         return RedirectResponse(url="/amigos?erro=naoachou", status_code=303)
     if target.id == me.id:
