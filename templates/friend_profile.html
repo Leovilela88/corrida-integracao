@@ -66,7 +66,7 @@
         <div class="record-card">
             <div class="record-label"><span class="record-ico" style="color:#c084fc">{{ bicon('clock') }}</span> Treino mais longo</div>
             {% if records.longest_dur and records.longest_dur.duration_min %}
-            <div class="record-value">{{ "%.0f"|format(records.longest_dur.duration_min) }} min</div>
+            <div class="record-value">{{ records.longest_dur.duration_min|hms }}</div>
             <div class="record-sub">{{ sport_label(records.longest_dur.sport) }} · {{ records.longest_dur.date.strftime('%d/%m/%y') }}</div>
             {% else %}<div class="record-value">—</div>{% endif %}
         </div>

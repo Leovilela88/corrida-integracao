@@ -252,6 +252,8 @@ def _from_json(s):
 
 from metrics import extra_metrics_list as _extra_metrics_list  # noqa: E402
 templates.env.filters["fromjson"] = _from_json
+from metrics import fmt_hms as _fmt_hms  # noqa: E402
+templates.env.filters["hms"] = _fmt_hms
 templates.env.globals["extra_metrics_list"] = _extra_metrics_list
 
 

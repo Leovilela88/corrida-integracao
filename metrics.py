@@ -76,6 +76,16 @@ def _fmt_duration(duration_min: Optional[float]) -> Optional[str]:
     return f"{d // 60}h{d % 60:02d}" if d >= 60 else f"{d} min"
 
 
+def fmt_hms(duration_min: Optional[float]) -> str:
+    """Minutos decimais -> H:MM:SS (ou MM:SS quando < 1h)."""
+    if not duration_min or duration_min <= 0:
+        return "—"
+    total = int(round(duration_min * 60))
+    h, rem = divmod(total, 3600)
+    m, s = divmod(rem, 60)
+    return f"{h}:{m:02d}:{s:02d}" if h else f"{m:02d}:{s:02d}"
+
+
 def _fmt_distance(distance_km: Optional[float]) -> Optional[str]:
     if not distance_km or distance_km <= 0:
         return None
@@ -117,7 +127,8 @@ def workout_share(sport, distance_km, duration_min, calories,
     label = SPORT_LABELS.get(sport, SPORT_LABELS["outro"])[0]
     color = SPORT_COLORS.get(sport, SPORT_COLORS["outro"])
     p = pace(sport, distance_km, duration_min)
-    dur, dist = _fmt_duration(duration_min), _fmt_distance(distance_km)
+    dur = fmt_hms(duration_min) if duration_min else None
+    dist = _fmt_distance(distance_km)
     cal = f"{calories:.0f} kcal" if calories else None
 
     if sport in ("corrida", "trilha"):

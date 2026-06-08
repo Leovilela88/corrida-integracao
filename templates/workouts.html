@@ -58,7 +58,7 @@
                     {% endif %}
                 </td>
                 <td>{{ "%.2f km"|format(w.distance_km) if w.distance_km else "—" }}</td>
-                <td>{{ "%.0f min"|format(w.duration_min) if w.duration_min else "—" }}</td>
+                <td>{{ w.duration_min|hms if w.duration_min else "—" }}</td>
                 <td>{{ p if p else "—" }}</td>
                 <td>{{ "%.0f"|format(w.calories) if w.calories else "—" }}</td>
                 <td class="notes-cell">{{ w.notes or "" }}</td>

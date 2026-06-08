@@ -22,7 +22,7 @@
     <div class="card"><div class="card-label">Distância</div><div class="card-value">{{ "%.2f"|format(w.distance_km) }}<span> km</span></div></div>
     {% endif %}
     {% if w.duration_min %}
-    <div class="card"><div class="card-label">Duração</div><div class="card-value">{{ "%.0f"|format(w.duration_min) }}<span> min</span></div></div>
+    <div class="card"><div class="card-label">Duração</div><div class="card-value" style="font-size:1.6rem">{{ w.duration_min|hms }}</div></div>
     {% endif %}
     {% if pace %}
     <div class="card"><div class="card-label">Ritmo</div><div class="card-value">{{ pace }}</div></div>
