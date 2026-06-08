@@ -4,37 +4,37 @@
 <header class="page-header">
     <div>
         <h1 class="page-title">Amigos</h1>
-        <p class="page-sub">Adicione amigos pelo código para competir no ranking.</p>
+        <p class="page-sub">Adicione amigos pelo nome de usuário para competir no ranking.</p>
     </div>
 </header>
 
 <section class="panel-section">
     <div class="code-card">
-        <div class="code-label">Seu código de amigo</div>
-        <div class="code-value" id="my-code">{{ athlete.friend_code }}</div>
-        <button type="button" class="btn-ghost btn-small" onclick="navigator.clipboard && navigator.clipboard.writeText('{{ athlete.friend_code }}')">Copiar</button>
+        <div class="code-label">Seu nome de usuário</div>
+        <div class="code-value" id="my-user">@{{ athlete.username or '—' }}</div>
+        {% if athlete.username %}<button type="button" class="btn-ghost btn-small" onclick="navigator.clipboard && navigator.clipboard.writeText('{{ athlete.username }}')">Copiar</button>{% endif %}
     </div>
-    <p class="hint">Compartilhe esse código com a galera. Quem tiver ele consegue te adicionar no ranking.</p>
+    <p class="hint">Compartilhe seu usuário com a galera. Quem tiver ele consegue te adicionar no ranking.</p>
 </section>
 
 <section class="form" style="max-width: 520px;">
     <h2 class="form-title">Adicionar amigo</h2>
     {% if ok %}<div class="alert alert-success">Pedido enviado para <strong>{{ ok }}</strong>. Quando aceitar, vocês competem no ranking.</div>{% endif %}
-    {% if erro == "naoachou" %}<div class="alert alert-error">Não encontrei ninguém com esse código.</div>
-    {% elif erro == "voce" %}<div class="alert alert-error">Esse é o seu próprio código. :)</div>
+    {% if erro == "naoachou" %}<div class="alert alert-error">Não encontrei ninguém com esse nome de usuário.</div>
+    {% elif erro == "voce" %}<div class="alert alert-error">Esse é o seu próprio usuário. :)</div>
     {% elif erro == "jaadd" %}<div class="alert alert-error">Essa pessoa já está no seu ranking.</div>{% endif %}
 
     {% if pending %}
     <div class="confirm-card">
         <div class="confirm-who">
             <div class="confirm-name">{{ pending.name }}</div>
-            <div class="confirm-code">{{ pending.code }}</div>
+            <div class="confirm-code">@{{ pending.username }}</div>
         </div>
         <p class="hint">Enviar um pedido de amizade para essa pessoa?</p>
         <div class="confirm-actions">
             <a href="/amigos" class="btn-ghost btn-small">Cancelar</a>
             <form method="post" action="/amigos/adicionar">
-                <input type="hidden" name="code" value="{{ pending.code }}" />
+                <input type="hidden" name="username" value="{{ pending.username }}" />
                 <button type="submit" class="btn-primary btn-small">Enviar pedido</button>
             </form>
         </div>
@@ -42,8 +42,8 @@
     {% else %}
     <form method="post" action="/amigos/buscar">
         <label>
-            <span>Código do amigo</span>
-            <input type="text" name="code" required maxlength="12" placeholder="ex: MF-7F3K2" autocapitalize="characters" autocorrect="off" style="text-transform: uppercase;" />
+            <span>Nome de usuário do amigo</span>
+            <input type="text" name="username" required maxlength="40" placeholder="ex: leo" autocapitalize="none" autocorrect="off" autocomplete="off" />
         </label>
         <div class="actions">
             <button type="submit" class="btn-primary">Buscar</button>
@@ -113,7 +113,7 @@
         {% endfor %}
     </div>
     {% else %}
-    <p class="empty">Você ainda não adicionou ninguém. Peça o código dos seus amigos!</p>
+    <p class="empty">Você ainda não adicionou ninguém. Peça o nome de usuário dos seus amigos!</p>
     {% endif %}
 </section>
 {% endblock %}

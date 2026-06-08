@@ -459,12 +459,18 @@ def friends_page(request: Request, db: Session = Depends(get_db),
         "friends.html", _friends_ctx(request, me, db, erro=erro, ok=ok))
 
 
+def _find_by_username(db: Session, uname: str):
+    u = (uname or "").strip().lstrip("@").lower()
+    if not u:
+        return None
+    return db.query(Athlete).filter(func.lower(Athlete.username) == u).first()
+
+
 @app.post("/amigos/buscar", response_class=HTMLResponse)
-def friends_lookup(request: Request, code: str = Form(...), db: Session = Depends(get_db)):
-    """Procura pelo código e mostra o NOME pra confirmar antes de mandar o pedido."""
+def friends_lookup(request: Request, username: str = Form(...), db: Session = Depends(get_db)):
+    """Procura pelo nome de usuário e mostra o NOME pra confirmar antes do pedido."""
     me = get_active_athlete(request, db)
-    target_code = auth.normalize_code(code)
-    target = db.query(Athlete).filter(Athlete.friend_code == target_code).first()
+    target = _find_by_username(db, username)
     if not target:
         return RedirectResponse(url="/amigos?erro=naoachou", status_code=303)
     if target.id == me.id:
@@ -474,18 +480,17 @@ def friends_lookup(request: Request, code: str = Form(...), db: Session = Depend
     ).first()
     if exists:
         return RedirectResponse(url="/amigos?erro=jaadd", status_code=303)
-    pending = {"name": target.name, "code": target.friend_code,
+    pending = {"name": target.name, "username": target.username,
                "athlete_id": target.id}
     return templates.TemplateResponse(
         "friends.html", _friends_ctx(request, me, db, pending=pending))
 
 
 @app.post("/amigos/adicionar")
-def friends_add(request: Request, code: str = Form(...), db: Session = Depends(get_db)):
+def friends_add(request: Request, username: str = Form(...), db: Session = Depends(get_db)):
     """Envia um pedido de amizade (pendente até o outro aceitar)."""
     me = get_active_athlete(request, db)
-    target_code = auth.normalize_code(code)
-    target = db.query(Athlete).filter(Athlete.friend_code == target_code).first()
+    target = _find_by_username(db, username)
     if not target:
         return RedirectResponse(url="/amigos?erro=naoachou", status_code=303)
     if target.id == me.id:
