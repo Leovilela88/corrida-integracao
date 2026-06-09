@@ -9,7 +9,8 @@ import secrets
 import time
 import uuid
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
+from fastapi.responses import (FileResponse, HTMLResponse, JSONResponse,
+                               RedirectResponse, Response)
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -213,7 +214,7 @@ templates = Jinja2Templates(directory="templates")
 # Caminhos que não exigem login.
 PUBLIC_PREFIXES = ("/static", "/sw.js", "/offline", "/manifest.webmanifest",
                    "/entrar", "/registrar", "/sair", "/primeiro-acesso", "/healthz",
-                   "/strava/status", "/esqueci", "/redefinir")
+                   "/strava/status", "/esqueci", "/redefinir", "/favicon.ico")
 
 
 @app.middleware("http")
@@ -2633,6 +2634,14 @@ def config_redirect():
 
 
 # ------------- API -------------
+
+@app.get("/favicon.ico")
+def favicon():
+    """Serve o logo como favicon (navegadores/sistemas buscam /favicon.ico)."""
+    path = os.path.join(os.path.dirname(__file__), "static", "icon-192.v3.png")
+    return FileResponse(path, media_type="image/png",
+                        headers={"Cache-Control": "public, max-age=86400"})
+
 
 @app.get("/sw.js")
 def service_worker():
