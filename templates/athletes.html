@@ -89,7 +89,11 @@
                     </select>
                 </label>
             </div>
-            <p class="hint">Apenas o <strong>peso</strong> entra no cálculo de calorias (<code>MET × peso × horas</code>). Altura, idade e sexo são guardados para IMC e métricas futuras.</p>
+            <label>
+                <span>E-mail <em>(para recuperar a senha)</em></span>
+                <input type="email" name="email" maxlength="120" value="{{ a.email or '' }}" autocapitalize="none" autocorrect="off" placeholder="voce@email.com" />
+            </label>
+            <p class="hint">Apenas o <strong>peso</strong> entra no cálculo de calorias (<code>MET × peso × horas</code>). O <strong>e-mail</strong> serve para recuperar sua senha. Altura, idade e sexo ficam guardados para IMC.</p>
             <div class="actions">
                 <button type="submit" class="btn-primary btn-small">Salvar alterações</button>
             </div>

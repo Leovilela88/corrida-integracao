@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Nova senha - Corrida Integração</title>
+    <link rel="icon" type="image/png" href="/static/icon-192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css?v=73" />
+</head>
+<body class="auth-body">
+<div class="auth-card">
+    <div class="auth-brand">
+        <img src="/static/INTEGRACAO_LOGO.png" alt="Corrida Integração" class="auth-logo-full" onerror="this.remove()" />
+    </div>
+    {% if invalido %}
+    <h1 class="auth-title">Link inválido</h1>
+    <p class="auth-sub">Este link de redefinição é inválido ou expirou (vale por 1 hora). Peça um novo.</p>
+    <a href="/esqueci" class="btn-primary auth-btn" style="text-decoration:none;display:block;text-align:center;">Pedir novo link</a>
+    {% else %}
+    <h1 class="auth-title">Criar nova senha</h1>
+    <p class="auth-sub">Escolha uma nova senha para a sua conta.</p>
+    {% if erro %}<div class="auth-error">{{ erro }}</div>{% endif %}
+    <form method="post" action="/redefinir/{{ token }}" class="auth-form">
+        <label><span>Nova senha</span>
+            <input type="password" name="password" required minlength="4" autocomplete="new-password" />
+        </label>
+        <button type="submit" class="btn-primary auth-btn">Salvar e entrar</button>
+    </form>
+    {% endif %}
+</div>
+</body>
+</html>

@@ -34,6 +34,7 @@ import achievements
 import auth
 import challenges
 import notifications
+import emailer
 import stats
 import strava_api
 import training_plan
@@ -95,6 +96,12 @@ def _init_db() -> None:
                 conn.execute(text("ALTER TABLE athletes ADD COLUMN username VARCHAR(30)"))
             if "password_hash" not in cols:
                 conn.execute(text("ALTER TABLE athletes ADD COLUMN password_hash VARCHAR(255)"))
+            if "email" not in cols:
+                conn.execute(text("ALTER TABLE athletes ADD COLUMN email VARCHAR(120)"))
+            if "reset_token" not in cols:
+                conn.execute(text("ALTER TABLE athletes ADD COLUMN reset_token VARCHAR(64)"))
+            if "reset_token_expires" not in cols:
+                conn.execute(text("ALTER TABLE athletes ADD COLUMN reset_token_expires TIMESTAMP"))
             if "friend_code" not in cols:
                 conn.execute(text("ALTER TABLE athletes ADD COLUMN friend_code VARCHAR(12)"))
             if "is_admin" not in cols:
@@ -206,7 +213,7 @@ templates = Jinja2Templates(directory="templates")
 # Caminhos que não exigem login.
 PUBLIC_PREFIXES = ("/static", "/sw.js", "/offline", "/manifest.webmanifest",
                    "/entrar", "/registrar", "/sair", "/primeiro-acesso", "/healthz",
-                   "/strava/status")
+                   "/strava/status", "/esqueci", "/redefinir")
 
 
 @app.middleware("http")
@@ -386,10 +393,12 @@ def register_submit(
     name: str = Form(...),
     username: str = Form(...),
     password: str = Form(...),
+    email: str = Form(""),
     db: Session = Depends(get_db),
 ):
     uname = auth.normalize_username(username)
     nm = name.strip()[:80]
+    addr = auth.normalize_email(email)[:120] or None
     if len(uname) < 3 or len(password) < 4 or not nm:
         return RedirectResponse(url="/registrar?erro=2", status_code=303)
     if not uname.replace("_", "").replace(".", "").isalnum():
@@ -398,7 +407,7 @@ def register_submit(
         return RedirectResponse(url="/registrar?erro=4", status_code=303)
     a = Athlete(
         name=nm, weight_kg=70.0,
-        username=uname,
+        username=uname, email=addr,
         password_hash=auth.hash_password(password),
         friend_code=_unique_friend_code(db),
         is_admin=0,
@@ -415,6 +424,71 @@ def register_submit(
 def logout(request: Request):
     request.session.clear()
     return RedirectResponse(url="/entrar", status_code=303)
+
+
+# ------------- recuperação de senha por e-mail -------------
+
+def _base_url(request: Request) -> str:
+    """URL base pública para montar links de e-mail (força https + domínio)."""
+    env = os.environ.get("BASE_URL")
+    if env:
+        return env.rstrip("/")
+    return f"https://{request.url.hostname}"
+
+
+@app.get("/esqueci", response_class=HTMLResponse)
+def forgot_page(request: Request, enviado: Optional[str] = None, erro: Optional[str] = None):
+    return templates.TemplateResponse(
+        "esqueci.html", {"request": request, "enviado": enviado, "erro": erro})
+
+
+@app.post("/esqueci")
+def forgot_submit(request: Request, email: str = Form(...), db: Session = Depends(get_db)):
+    """Gera token e envia o link de redefinição. Resposta é sempre a mesma
+    (não revela se o e-mail existe)."""
+    addr = auth.normalize_email(email)
+    a = db.query(Athlete).filter(func.lower(Athlete.email) == addr).first() if addr else None
+    if a:
+        a.reset_token = auth.gen_reset_token()
+        a.reset_token_expires = now_br() + timedelta(hours=1)
+        db.commit()
+        link = f"{_base_url(request)}/redefinir/{a.reset_token}"
+        html, text = emailer.password_reset_html(a.name, link)
+        sent = emailer.send_email(a.email, "Redefinir sua senha · Corrida Integração", html, text)
+        if not sent:
+            # Sem SMTP configurado (ou falha): registra o link no log do servidor.
+            print(f"[reset-senha] link para {a.email}: {link}", flush=True)
+    return RedirectResponse(url="/esqueci?enviado=1", status_code=303)
+
+
+@app.get("/redefinir/{token}", response_class=HTMLResponse)
+def reset_page(request: Request, token: str, db: Session = Depends(get_db)):
+    a = db.query(Athlete).filter(Athlete.reset_token == token).first()
+    if not a or not a.reset_token_expires or a.reset_token_expires < now_br():
+        return templates.TemplateResponse(
+            "redefinir.html", {"request": request, "invalido": True, "token": token})
+    return templates.TemplateResponse(
+        "redefinir.html", {"request": request, "invalido": False, "token": token, "erro": None})
+
+
+@app.post("/redefinir/{token}")
+def reset_submit(request: Request, token: str, password: str = Form(...),
+                 db: Session = Depends(get_db)):
+    a = db.query(Athlete).filter(Athlete.reset_token == token).first()
+    if not a or not a.reset_token_expires or a.reset_token_expires < now_br():
+        return templates.TemplateResponse(
+            "redefinir.html", {"request": request, "invalido": True, "token": token})
+    if len(password) < 4:
+        return templates.TemplateResponse(
+            "redefinir.html", {"request": request, "invalido": False, "token": token,
+                               "erro": "A senha precisa de pelo menos 4 caracteres."})
+    a.password_hash = auth.hash_password(password)
+    a.reset_token = None
+    a.reset_token_expires = None
+    db.commit()
+    request.session["athlete_id"] = a.id
+    _touch_last_seen(db, a)
+    return RedirectResponse(url="/", status_code=303)
 
 
 # ------------- amigos -------------
@@ -2132,6 +2206,7 @@ def athletes_edit(
     height_cm: Optional[str] = Form(None),
     age: Optional[str] = Form(None),
     sex: Optional[str] = Form(None),
+    email: str = Form(""),
     db: Session = Depends(get_db),
 ):
     me = get_active_athlete(request, db)
@@ -2146,6 +2221,7 @@ def athletes_edit(
         a.height_cm = _to_float(height_cm)
         a.age = _to_int(age)
         a.sex = sex.upper() if sex in ("M", "F", "m", "f") else None
+        a.email = auth.normalize_email(email)[:120] or None
         db.commit()
     return RedirectResponse(url="/atletas", status_code=303)
 

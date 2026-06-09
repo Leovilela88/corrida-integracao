@@ -50,6 +50,15 @@ def gen_temp_password() -> str:
     return "".join(secrets.choice(_CODE_ALPHABET) for _ in range(8)).lower()
 
 
+def gen_reset_token() -> str:
+    """Token aleatório para o link de redefinição de senha (URL-safe)."""
+    return secrets.token_urlsafe(32)
+
+
+def normalize_email(email: str) -> str:
+    return (email or "").strip().lower()
+
+
 def normalize_username(username: str) -> str:
     return (username or "").strip().lower()
 

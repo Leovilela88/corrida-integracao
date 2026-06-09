@@ -18,6 +18,9 @@ class Athlete(Base):
     # --- conta / login ---
     username = Column(String(30), unique=True, index=True, nullable=True)
     password_hash = Column(String(255), nullable=True)
+    email = Column(String(120), index=True, nullable=True)
+    reset_token = Column(String(64), index=True, nullable=True)
+    reset_token_expires = Column(DateTime, nullable=True)
     friend_code = Column(String(12), unique=True, index=True, nullable=True)
     is_admin = Column(Integer, nullable=False, default=0)  # 0/1
     last_seen_at = Column(DateTime, nullable=True)
