@@ -178,7 +178,7 @@
     logo.crossOrigin = 'anonymous';
     let logoReady = false;
     logo.onload = () => { logoReady = true; if (overlay && !overlay.hidden) render(); };
-    logo.src = '/static/INTEGRACAO_LOGO.png';
+    logo.src = '/static/logo_oficial.png';
 
     // logos de realização (Grupo EP) e patrocínio (Covabra) — rodapé do card
     const epLogo = new Image(); epLogo.crossOrigin = 'anonymous'; let epReady = false;

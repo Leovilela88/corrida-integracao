@@ -1,3 +1,12 @@
+/* Fonte oficial da marca */
+@font-face {
+    font-family: 'Brinova';
+    src: url('/static/Brinova-Italic.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: italic;
+    font-display: swap;
+}
+
 :root {
     --bg: #010714;
     --bg-grad: radial-gradient(1200px 600px at 80% -10%, rgba(28,125,240,0.10), transparent 60%),
@@ -29,7 +38,7 @@ html { height: 100%; }
 body {
     margin: 0;
     position: relative;   /* ancora a camada de fundo */
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Brinova', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background-color: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -41,15 +50,15 @@ body {
 /* Camada de fundo (constelação): cobre toda a altura do documento e rola
    junto com o conteúdo (position: absolute, não fixed). */
 #bg-image {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-image: url('/static/bg-integracao.png');
-    background-size: 100% auto;
-    background-position: top center;
-    background-repeat: repeat-y;
+    position: fixed;
+    inset: 0;
+    background-image: url('/static/bg_oficial.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     z-index: -1;
     pointer-events: none;
-    filter: brightness(0.9);
+    filter: brightness(0.95);
 }
 /* Overlay escuro sobre a imagem de fundo (deixa tudo mais escuro de forma uniforme) */
 #bg-image::after {
