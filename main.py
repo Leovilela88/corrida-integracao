@@ -217,8 +217,22 @@ PUBLIC_PREFIXES = ("/static", "/sw.js", "/offline", "/manifest.webmanifest",
                    "/strava/status", "/esqueci", "/redefinir", "/favicon.ico")
 
 
+# Domínio oficial: tudo cai aqui (pra o callback do Strava bater e evitar
+# conteúdo duplicado). Os outros domínios redirecionam pra ele.
+CANONICAL_HOST = os.environ.get("CANONICAL_HOST", "app.corridaintegracao.com.br")
+_REDIRECT_HOSTS = {
+    "corridaintegracao.app.br", "www.corridaintegracao.app.br",
+    "web-production-d71bc.up.railway.app",
+    "www.app.corridaintegracao.com.br",
+}
+
+
 @app.middleware("http")
 async def require_login(request: Request, call_next):
+    # Redireciona domínios alternativos para o oficial (só navegações GET)
+    if request.method == "GET" and request.url.hostname in _REDIRECT_HOSTS:
+        q = ("?" + request.url.query) if request.url.query else ""
+        return RedirectResponse(f"https://{CANONICAL_HOST}{request.url.path}{q}", status_code=302)
     path = request.url.path
     if any(path == p or path.startswith(p + "/") or path.startswith(p) for p in PUBLIC_PREFIXES):
         resp = await call_next(request)
@@ -1127,20 +1141,10 @@ def _parse_workout_form(
             "duration_min": dur, "calories": cal}
 
 
-@app.get("/novo", response_class=HTMLResponse)
-def new_form(request: Request, db: Session = Depends(get_db)):
-    athlete = get_active_athlete(request, db)
-    return templates.TemplateResponse(
-        "form.html",
-        {
-            "request": request,
-            "athlete": athlete,
-            "athletes": get_all_athletes(db),
-            "today": today_br().isoformat(),
-            "workout": None,
-            "action": "/novo",
-        },
-    )
+@app.get("/novo")
+def new_form(request: Request):
+    # Cadastro manual desativado: as atividades vêm do Strava.
+    return RedirectResponse(url="/importar", status_code=303)
 
 
 @app.post("/novo")
