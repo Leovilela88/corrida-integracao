@@ -132,8 +132,9 @@ def workout_share(sport, distance_km, duration_min, calories,
     cal = f"{calories:.0f} kcal" if calories else None
 
     if sport in ("corrida", "trilha"):
+        # calorias removidas do card por enquanto
         raw = [("clock", dur, "Tempo"), ("distance", dist, "Distância"),
-               ("pace", p, "Pace"), ("flame", cal, "Calorias")]
+               ("pace", p, "Pace")]
     elif sport == "natacao":
         raw = [("distance", dist, "Distância"), ("clock", dur, "Tempo"),
                ("pace", p, "Ritmo"), ("flame", cal, "Calorias")]

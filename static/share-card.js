@@ -190,7 +190,7 @@
     // Logo oficial "Powered by Strava" — obrigatório em imagens que exibem dados do Strava
     const stravaLogo = new Image(); stravaLogo.crossOrigin = 'anonymous'; let stravaReady = false;
     stravaLogo.onload = () => { stravaReady = true; if (overlay && !overlay.hidden) render(); };
-    stravaLogo.src = '/static/strava_powered_white.png';
+    stravaLogo.src = '/static/strava_powered_white.png?v=2';
 
     // Garante que a Brinova (fonte oficial) esteja carregada antes de desenhar no canvas.
     if (document.fonts) {
@@ -492,8 +492,14 @@
     function drawMetricsRow(mts, m, color) {
         const cx = W / 2;
         const n = mts.length || 1;
-        const colW = Math.min(290, 960 / n);
-        const startX = cx - (colW * n) / 2 + colW / 2;
+        // logo "Powered by Strava" à direita dos dados, com divisor "|"
+        const showStrava = stravaReady && mts.length > 0;
+        const sH = 30, sW = showStrava ? sH * (stravaLogo.width / stravaLogo.height) : 0;
+        const sepGap = showStrava ? 46 : 0;        // vão reservado p/ o "|" + logo
+        const colW = Math.min(250, (980 - sW - sepGap) / n);
+        const metricsW = colW * n;
+        const x0 = cx - (metricsW + sepGap + sW) / 2;   // borda esquerda do grupo
+        const startX = x0 + colW / 2;                   // centro da 1ª coluna
         mts.forEach((mt, i) => {
             const x = startX + i * colW;
             drawIcon(mt.icon, x, m.metricsIconCy, 18, '#05e0a3');
@@ -507,6 +513,20 @@
             ctx.fillText((mt.label || '').toUpperCase(), x, m.metricsLabelY);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
         });
+        if (showStrava) {
+            const sepX = x0 + metricsW + sepGap / 2;
+            ctx.strokeStyle = 'rgba(255,255,255,0.30)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(sepX, m.metricsIconCy - 10);
+            ctx.lineTo(sepX, m.metricsLabelY + 2);
+            ctx.stroke();
+            const midY = (m.metricsIconCy + m.metricsLabelY) / 2;
+            ctx.save();
+            ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 6;
+            ctx.drawImage(stravaLogo, x0 + metricsW + sepGap, midY - sH / 2, sW, sH);
+            ctx.restore();
+        }
     }
 
     function drawContent(m) {
@@ -715,26 +735,16 @@
         ctx.shadowColor = 'rgba(0,0,0,0.5)';
         ctx.shadowBlur = 8;
 
-        // bloco inferior centralizado (de baixo p/ cima): hashtag → Powered by Strava
+        // hashtag (linha mais baixa)
         ctx.fillStyle = 'rgba(255,255,255,0.78)';
         ctx.font = '700 20px Brinova, Inter, sans-serif';
         if ('letterSpacing' in ctx) ctx.letterSpacing = '1px';
         ctx.fillText(HASHTAG, cx, fb);
         if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
-        // "Powered by Strava" logo acima da hashtag (atribuição obrigatória)
-        let stackTop = fb - 30;                    // topo do bloco centralizado
-        if (stravaReady) {
-            const sH = 38, sW = sH * (stravaLogo.width / stravaLogo.height);
-            ctx.shadowBlur = 6;
-            ctx.drawImage(stravaLogo, cx - sW / 2, fb - 30 - sH, sW, sH);
-            stackTop = fb - 30 - sH;
-            ctx.shadowBlur = 8;
-        }
-
-        // faixa de patrocinadores acima do bloco centralizado
+        // faixa de patrocinadores (realização + patrocínio)
         const logoH = 32;
-        const logosBaseline = stackTop - 34;       // base dos logos
+        const logosBaseline = fb - 46;             // base dos logos
         const labelY = logosBaseline - logoH - 10; // rótulos acima
         const colL = W * 0.31, colR = W * 0.69;
 
