@@ -38,12 +38,12 @@
         ctx.shadowBlur = 14;
         ctx.shadowOffsetY = 2;
         ctx.fillStyle = '#e8eef7';
-        ctx.font = '700 19px Inter, sans-serif';
+        ctx.font = '700 19px Brinova, Inter, sans-serif';
         if ('letterSpacing' in ctx) ctx.letterSpacing = '5px';
         ctx.fillText('EU SOU', cx, 92);
         if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
         ctx.fillStyle = '#05e0a3';
-        ctx.font = '800 64px Inter, sans-serif';
+        ctx.font = '800 64px Brinova, Inter, sans-serif';
         ctx.fillText('FINISHER', cx, 156);
         if (logoReady) {
             const lw = 238, lh = logo.height * (lw / logo.width);
@@ -188,9 +188,17 @@
     spLogo.onload = () => { spReady = true; if (overlay && !overlay.hidden) render(); };
     spLogo.src = '/static/logo_covabra.png';
 
-    document.fonts && document.fonts.ready.then(() => {
-        if (overlay && !overlay.hidden) render();
-    }).catch(() => {});
+    // Garante que a Brinova (fonte oficial) esteja carregada antes de desenhar no canvas.
+    if (document.fonts) {
+        Promise.all([
+            document.fonts.load('800 64px Brinova'),
+            document.fonts.load('700 19px Brinova'),
+            document.fonts.load('400 24px Brinova'),
+        ]).then(() => { if (overlay && !overlay.hidden) render(); }).catch(() => {});
+        document.fonts.ready.then(() => {
+            if (overlay && !overlay.hidden) render();
+        }).catch(() => {});
+    }
 
     // ---------------------------------------------------------------- util
     function roundRect(x, y, w, h, r) {
@@ -354,7 +362,7 @@
         m.divY = m.athleteY - 46;
 
         if (payload.type === 'badge') {
-            ctx.font = '400 38px Inter, sans-serif';
+            ctx.font = '400 38px Brinova, Inter, sans-serif';
             m.lines = wrap(payload.desc, 880);
             m.bodyBottom = m.divY - 64;
             m.bodyTop = m.bodyBottom - (m.lines.length - 1) * 50;
@@ -384,21 +392,21 @@
 
         if (days <= 0) {
             ctx.fillStyle = '#05e0a3';
-            ctx.font = '800 40px Inter, sans-serif';
+            ctx.font = '800 40px Brinova, Inter, sans-serif';
             ctx.fillText('É HOJE!', cx, 150);
         } else {
             ctx.fillStyle = '#e8eef7';
-            ctx.font = '700 19px Inter, sans-serif';
+            ctx.font = '700 19px Brinova, Inter, sans-serif';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '4px';
             ctx.fillText('FALTAM', cx, 92);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
             ctx.fillStyle = '#05e0a3';
-            ctx.font = '800 72px Inter, sans-serif';
+            ctx.font = '800 72px Brinova, Inter, sans-serif';
             ctx.fillText(String(days), cx, 166);
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = '700 20px Inter, sans-serif';
+            ctx.font = '700 20px Brinova, Inter, sans-serif';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '3px';
             ctx.fillText(days === 1 ? 'DIA PARA A' : 'DIAS PARA A', cx, 200);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
@@ -416,7 +424,7 @@
 
     function drawBrand(cx, y) {
         const txt = 'Corrida Integração 2026';
-        ctx.font = '700 34px Inter, sans-serif';
+        ctx.font = '700 34px Brinova, Inter, sans-serif';
         ctx.textAlign = 'left';
         const tw = ctx.measureText(txt).width;
         const lh = 44, lw = logoReady ? logo.width * (lh / logo.height) : 0;
@@ -487,10 +495,10 @@
             drawIcon(mt.icon, x, m.metricsIconCy, 18, '#05e0a3');
             ctx.textAlign = 'center';
             ctx.fillStyle = '#ffffff';
-            ctx.font = '800 34px Inter, sans-serif';
+            ctx.font = '800 34px Brinova, Inter, sans-serif';
             ctx.fillText(mt.value, x, m.metricsValueY);
             ctx.fillStyle = '#ffffff';
-            ctx.font = '600 18px Inter, sans-serif';
+            ctx.font = '600 18px Brinova, Inter, sans-serif';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '1px';
             ctx.fillText((mt.label || '').toUpperCase(), x, m.metricsLabelY);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
@@ -511,7 +519,7 @@
             ctx.fillStyle = color; ctx.fill();
 
             ctx.fillStyle = color;
-            ctx.font = '600 32px Inter, sans-serif';
+            ctx.font = '600 32px Brinova, Inter, sans-serif';
             ctx.textAlign = 'center';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '2px';
             if (payload.type === 'badge') ctx.fillText('CONQUISTA DESBLOQUEADA', cx, m.labelY);
@@ -523,31 +531,31 @@
         ctx.fillStyle = '#ffffff';
         if (isWorkout) {
             // slogan da corrida (caixa alta) no lugar do nome do esporte
-            ctx.font = '800 42px Inter, sans-serif';
-            const sloganLines = wrap('A MINHA MAIOR VITÓRIA É A PRÓXIMA', 860);
+            ctx.font = '800 42px Brinova, Inter, sans-serif';
+            const sloganLines = wrap('HISTÓRIA SE FAZ CORRENDO', 860);
             sloganLines.forEach((ln, i) => {
                 ctx.fillText(ln, cx, m.titleY - (sloganLines.length - 1 - i) * 50);
             });
         } else if (isPeriod) {
             // "MEU CAMINHO ATÉ AQUI [EM UM MÊS]"
-            ctx.font = '800 41px Inter, sans-serif';
+            ctx.font = '800 41px Brinova, Inter, sans-serif';
             const phrase = ('MEU CAMINHO ATÉ AQUI ' + (payload.phrase || '')).trim();
             const lines = wrap(phrase, 860);
             lines.forEach((ln, i) => {
                 ctx.fillText(ln, cx, m.titleY - (lines.length - 1 - i) * 48);
             });
         } else if (payload.type === 'medal') {
-            ctx.font = '800 72px Inter, sans-serif';
+            ctx.font = '800 72px Brinova, Inter, sans-serif';
             ctx.fillText(payload.medalLabel, cx, m.titleY);
         } else {
-            ctx.font = '800 62px Inter, sans-serif';
+            ctx.font = '800 62px Brinova, Inter, sans-serif';
             ctx.fillText(payload.title, cx, m.titleY);
         }
 
         // corpo (métricas)
         if (payload.type === 'badge') {
             ctx.fillStyle = '#cbd5e1';
-            ctx.font = '400 38px Inter, sans-serif';
+            ctx.font = '400 38px Brinova, Inter, sans-serif';
             m.lines.forEach((ln, i) => {
                 ctx.fillText(ln, cx, m.bodyBottom - (m.lines.length - 1 - i) * 50);
             });
@@ -564,7 +572,7 @@
             ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(cx - 220, m.divY); ctx.lineTo(cx + 220, m.divY); ctx.stroke();
             ctx.fillStyle = '#ffffff';
-            ctx.font = '800 44px Inter, sans-serif';
+            ctx.font = '800 44px Brinova, Inter, sans-serif';
             ctx.fillText(ATHLETE, cx, m.athleteY);
             drawBrand(cx, m.brandY);
         }
@@ -587,9 +595,9 @@
             const x = lastAlone ? cx : (c === 0 ? leftCx : rightCx);
             const top = gridTop + Math.floor(i / cols) * rowH;
             drawIcon(mt.icon, x, top, 23, '#05e0a3');
-            ctx.fillStyle = '#ffffff'; ctx.font = '800 44px Inter, sans-serif';
+            ctx.fillStyle = '#ffffff'; ctx.font = '800 44px Brinova, Inter, sans-serif';
             ctx.fillText(mt.value, x, top + 56);
-            ctx.fillStyle = '#ffffff'; ctx.font = '600 23px Inter, sans-serif';
+            ctx.fillStyle = '#ffffff'; ctx.font = '600 23px Brinova, Inter, sans-serif';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '1px';
             ctx.fillText((mt.label || '').toUpperCase(), x, top + 90);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
@@ -597,8 +605,8 @@
 
         // slogan (caixa alta) no lugar do nome do esporte (sem ponto/data/rodapé)
         const titleY = gridTop - 66;
-        ctx.fillStyle = '#ffffff'; ctx.font = '800 54px Inter, sans-serif';
-        const sloganLines = wrap('A MINHA MAIOR VITÓRIA É A PRÓXIMA', 900);
+        ctx.fillStyle = '#ffffff'; ctx.font = '800 54px Brinova, Inter, sans-serif';
+        const sloganLines = wrap('HISTÓRIA SE FAZ CORRENDO', 900);
         sloganLines.forEach((ln, i) => {
             ctx.fillText(ln, cx, titleY - (sloganLines.length - 1 - i) * 62);
         });
@@ -705,7 +713,7 @@
 
         // hashtag (linha mais baixa)
         ctx.fillStyle = 'rgba(255,255,255,0.78)';
-        ctx.font = '700 20px Inter, sans-serif';
+        ctx.font = '700 20px Brinova, Inter, sans-serif';
         if ('letterSpacing' in ctx) ctx.letterSpacing = '1px';
         ctx.fillText(HASHTAG, cx, fb);
         if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
@@ -717,7 +725,7 @@
         const colL = W * 0.31, colR = W * 0.69;
 
         ctx.fillStyle = 'rgba(255,255,255,0.55)';
-        ctx.font = '700 15px Inter, sans-serif';
+        ctx.font = '700 15px Brinova, Inter, sans-serif';
         if ('letterSpacing' in ctx) ctx.letterSpacing = '2px';
         ctx.fillText('REALIZAÇÃO', colL, labelY);
         ctx.fillText('PATROCÍNIO', colR, labelY);
@@ -742,7 +750,7 @@
         ctx.shadowColor = 'rgba(0,0,0,0.5)';
         ctx.shadowBlur = 8;
         ctx.fillStyle = 'rgba(255,255,255,0.78)';
-        ctx.font = '700 24px Inter, sans-serif';
+        ctx.font = '700 24px Brinova, Inter, sans-serif';
         if ('letterSpacing' in ctx) ctx.letterSpacing = '1px';
         ctx.fillText(HASHTAG, cx, H - 34);
         if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
