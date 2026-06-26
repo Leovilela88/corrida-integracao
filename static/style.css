@@ -3,7 +3,10 @@
     font-family: 'Brinova';
     src: url('/static/Brinova-Italic.ttf') format('truetype');
     font-weight: 100 900;
-    font-style: italic;
+    /* a face é visualmente itálica, mas declaramos como "normal" para que TODOS os
+       navegadores (inclusive Safari no desktop) a usem no texto de estilo normal —
+       senão caem no Inter de fallback */
+    font-style: normal;
     font-display: swap;
 }
 
@@ -33,7 +36,7 @@
 
 * { box-sizing: border-box; }
 
-html { height: 100%; font-size: 17px; }
+html { height: 100%; font-size: 18px; }
 
 body {
     margin: 0;
