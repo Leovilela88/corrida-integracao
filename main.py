@@ -246,13 +246,47 @@ async def require_login(request: Request, call_next):
     return await call_next(request)
 
 
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    """Cabeçalhos de segurança básicos (sem CSP para não quebrar os CDNs/inline)."""
+    resp = await call_next(request)
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("X-Frame-Options", "DENY")
+    resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    return resp
+
+
+# --- Rate limit simples em memória (login e recuperação de senha) -------------
+_RATE_BUCKETS: dict[tuple[str, str], list[float]] = {}
+
+
+def _client_ip(request: Request) -> str:
+    """IP real do cliente (atrás do Cloudflare/Railway)."""
+    return (request.headers.get("cf-connecting-ip")
+            or request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+            or (request.client.host if request.client else "?"))
+
+
+def _rate_limited(request: Request, bucket: str, limit: int = 10, window: int = 300) -> bool:
+    """True se este IP excedeu `limit` tentativas em `window` segundos para `bucket`."""
+    key = (bucket, _client_ip(request))
+    now = time.time()
+    hits = [t for t in _RATE_BUCKETS.get(key, []) if now - t < window]
+    hits.append(now)
+    _RATE_BUCKETS[key] = hits
+    return len(hits) > limit
+
+
 # SECRET_KEY assina o cookie de sessão. Defina no Railway; sem ela, gera uma
 # efêmera (as sessões caem a cada deploy, mas o app não quebra).
 _SECRET = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+# Cookie de sessão "Secure" em produção (HTTPS). Ligue COOKIE_SECURE=1 no Railway;
+# fica desligado no local (HTTP) para não travar o login em desenvolvimento.
+_COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "").lower() in ("1", "true", "yes")
 app.add_middleware(
     SessionMiddleware,
     secret_key=_SECRET,
-    https_only=False,
+    https_only=_COOKIE_SECURE,
     same_site="lax",
     max_age=60 * 60 * 24 * 30,  # 30 dias
 )
@@ -357,6 +391,8 @@ def login_submit(
     password: str = Form(...),
     db: Session = Depends(get_db),
 ):
+    if _rate_limited(request, "login", limit=10, window=300):
+        return RedirectResponse(url="/entrar?erro=rate", status_code=303)
     uname = auth.normalize_username(username)
     a = db.query(Athlete).filter(func.lower(Athlete.username) == uname).first()
     if not a or not a.password_hash or not auth.verify_password(password, a.password_hash):
@@ -461,6 +497,9 @@ def forgot_page(request: Request, enviado: Optional[str] = None, erro: Optional[
 def forgot_submit(request: Request, email: str = Form(...), db: Session = Depends(get_db)):
     """Gera token e envia o link de redefinição. Resposta é sempre a mesma
     (não revela se o e-mail existe)."""
+    # Throttle: resposta idêntica (não revela nada), só não faz o trabalho.
+    if _rate_limited(request, "reset", limit=5, window=300):
+        return RedirectResponse(url="/esqueci?enviado=1", status_code=303)
     addr = auth.normalize_email(email)
     a = db.query(Athlete).filter(func.lower(Athlete.email) == addr).first() if addr else None
     if a:

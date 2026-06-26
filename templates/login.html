@@ -35,7 +35,8 @@
     {% else %}
     <h1 class="auth-title">Entrar</h1>
     <p class="auth-sub">Bem-vindo de volta ao Corrida Integração.</p>
-    {% if erro %}<div class="auth-error">Usuário ou senha incorretos.</div>{% endif %}
+    {% if erro == "rate" %}<div class="auth-error">Muitas tentativas. Aguarde alguns minutos e tente de novo.</div>
+    {% elif erro %}<div class="auth-error">Usuário ou senha incorretos.</div>{% endif %}
     <form method="post" action="/entrar" class="auth-form">
         <label><span>Usuário</span>
             <input type="text" name="username" required autocomplete="username" autocapitalize="none" autocorrect="off" />

@@ -10,6 +10,14 @@ if DATABASE_URL.startswith("postgres://"):
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 engine = create_engine(DATABASE_URL, connect_args=connect_args, pool_pre_ping=True)
+
+# Log de boot: deixa explícito se está em Postgres (persistente) ou SQLite (efêmero).
+if engine.dialect.name == "postgresql":
+    print("[db] Banco ativo: PostgreSQL (persistente).", flush=True)
+else:
+    print("[db] ATENCAO: banco ativo e SQLite EFEMERO — os dados somem a cada deploy. "
+          "Defina DATABASE_URL no Railway para usar o Postgres.", flush=True)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
