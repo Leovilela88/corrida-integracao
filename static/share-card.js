@@ -374,8 +374,8 @@
         } else {
             // treino, medalha e resumo (período): só uma linha de métricas
             m.metricsLabelY = m.divY - 58;
-            m.metricsValueY = m.metricsLabelY - 42;
-            m.metricsIconCy = m.metricsValueY - 74;
+            m.metricsValueY = m.metricsLabelY - 50;
+            m.metricsIconCy = m.metricsValueY - 84;
             m.bodyTop = m.metricsIconCy - 30;
             m.titleY = m.bodyTop - 62;
         }
@@ -494,21 +494,21 @@
         const n = mts.length || 1;
         // logo "Powered by Strava" à direita dos dados, com divisor "|"
         const showStrava = stravaReady && mts.length > 0;
-        const sH = 30, sW = showStrava ? sH * (stravaLogo.width / stravaLogo.height) : 0;
-        const sepGap = showStrava ? 46 : 0;        // vão reservado p/ o "|" + logo
+        const sH = 38, sW = showStrava ? sH * (stravaLogo.width / stravaLogo.height) : 0;
+        const sepGap = showStrava ? 30 : 0;        // vão reservado p/ o "|" + logo
         const colW = Math.min(250, (980 - sW - sepGap) / n);
         const metricsW = colW * n;
         const x0 = cx - (metricsW + sepGap + sW) / 2;   // borda esquerda do grupo
         const startX = x0 + colW / 2;                   // centro da 1ª coluna
         mts.forEach((mt, i) => {
             const x = startX + i * colW;
-            drawIcon(mt.icon, x, m.metricsIconCy, 18, '#05e0a3');
+            drawIcon(mt.icon, x, m.metricsIconCy, 22, '#05e0a3');
             ctx.textAlign = 'center';
             ctx.fillStyle = '#ffffff';
-            ctx.font = '800 34px Brinova, Inter, sans-serif';
+            ctx.font = '800 42px Brinova, Inter, sans-serif';
             ctx.fillText(mt.value, x, m.metricsValueY);
             ctx.fillStyle = '#ffffff';
-            ctx.font = '600 18px Brinova, Inter, sans-serif';
+            ctx.font = '600 20px Brinova, Inter, sans-serif';
             if ('letterSpacing' in ctx) ctx.letterSpacing = '1px';
             ctx.fillText((mt.label || '').toUpperCase(), x, m.metricsLabelY);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
@@ -724,7 +724,7 @@
     // Limite inferior seguro: no Stories o Instagram cobre ~250px de baixo;
     // no Feed 4:5 a imagem aparece quase inteira.
     function footerSafeBottom() {
-        return fmt === 'story' ? H - 250 : H - 56;
+        return fmt === 'story' ? H - 190 : H - 56;
     }
 
     // Rodapé: realização (Grupo EP) + patrocínio (Covabra) + hashtag
