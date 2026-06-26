@@ -1026,7 +1026,7 @@ def dashboard(
         .order_by(Goal.id).all()
     )
     goals_progress = [stats.goal_progress(db, athlete.id, g, today) for g in goals]
-    calendars = stats.monthly_calendars(db, athlete.id, today)
+    calendars = stats.monthly_calendars(db, athlete.id, today, months=1)
     badges = achievements.evaluate(db, athlete.id)
     # desafios aceitos (mostra as barras enchendo no dashboard)
     _ch_joins = db.query(ChallengeJoin).filter(ChallengeJoin.athlete_id == athlete.id).all()

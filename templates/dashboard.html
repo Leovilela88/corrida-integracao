@@ -352,7 +352,7 @@
 <section class="panel-section">
     <div class="section-head">
         <h2>Calendário de treinos</h2>
-        <span class="section-sub">{{ calendars.active_days }} dias ativos nos últimos {{ calendars.n_months }} meses</span>
+        <span class="section-sub">{{ calendars.active_days }} dias ativos {{ "no último mês" if calendars.n_months == 1 else "nos últimos %d meses" % calendars.n_months }}</span>
     </div>
     <div class="cal-grid">
         {% for month in calendars.months %}
