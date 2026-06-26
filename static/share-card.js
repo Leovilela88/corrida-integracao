@@ -715,24 +715,28 @@
         ctx.shadowColor = 'rgba(0,0,0,0.5)';
         ctx.shadowBlur = 8;
 
-        // hashtag (linha mais baixa)
+        // bloco inferior centralizado (de baixo p/ cima): hashtag → Powered by Strava
         ctx.fillStyle = 'rgba(255,255,255,0.78)';
         ctx.font = '700 20px Brinova, Inter, sans-serif';
         if ('letterSpacing' in ctx) ctx.letterSpacing = '1px';
         ctx.fillText(HASHTAG, cx, fb);
         if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
-        // faixa de logos
+        // "Powered by Strava" logo acima da hashtag (atribuição obrigatória)
+        let stackTop = fb - 30;                    // topo do bloco centralizado
+        if (stravaReady) {
+            const sH = 38, sW = sH * (stravaLogo.width / stravaLogo.height);
+            ctx.shadowBlur = 6;
+            ctx.drawImage(stravaLogo, cx - sW / 2, fb - 30 - sH, sW, sH);
+            stackTop = fb - 30 - sH;
+            ctx.shadowBlur = 8;
+        }
+
+        // faixa de patrocinadores acima do bloco centralizado
         const logoH = 32;
-        const logosBaseline = fb - 46;             // base dos logos
+        const logosBaseline = stackTop - 34;       // base dos logos
         const labelY = logosBaseline - logoH - 10; // rótulos acima
         const colL = W * 0.31, colR = W * 0.69;
-
-        // "Powered by Strava" centralizado acima dos rótulos (atribuição obrigatória)
-        if (stravaReady) {
-            const sH = 26, sW = sH * (stravaLogo.width / stravaLogo.height);
-            ctx.drawImage(stravaLogo, cx - sW / 2, labelY - 30 - sH, sW, sH);
-        }
 
         ctx.fillStyle = 'rgba(255,255,255,0.55)';
         ctx.font = '700 15px Brinova, Inter, sans-serif';
