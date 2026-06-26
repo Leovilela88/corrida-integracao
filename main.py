@@ -1175,51 +1175,11 @@ def create_workout(
     return RedirectResponse(url="/", status_code=303)
 
 
-@app.get("/treino/{workout_id}/editar", response_class=HTMLResponse)
-def edit_form(request: Request, workout_id: int, db: Session = Depends(get_db)):
-    athlete = get_active_athlete(request, db)
-    w = db.query(Workout).filter(
-        Workout.id == workout_id, Workout.athlete_id == athlete.id
-    ).first()
-    if not w:
-        return RedirectResponse(url="/treinos", status_code=303)
-    return templates.TemplateResponse(
-        "form.html",
-        {
-            "request": request,
-            "athlete": athlete,
-            "athletes": get_all_athletes(db),
-            "today": today_br().isoformat(),
-            "workout": w,
-            "action": f"/treino/{w.id}/editar",
-        },
-    )
-
-
+@app.get("/treino/{workout_id}/editar")
 @app.post("/treino/{workout_id}/editar")
-def edit_workout(
-    request: Request,
-    workout_id: int,
-    sport: str = Form(...),
-    workout_date: str = Form(...),
-    distance_m: Optional[str] = Form(None),
-    duration_min: Optional[str] = Form(None),
-    calories: Optional[str] = Form(None),
-    notes: Optional[str] = Form(None),
-    db: Session = Depends(get_db),
-):
-    athlete = get_active_athlete(request, db)
-    w = db.query(Workout).filter(
-        Workout.id == workout_id, Workout.athlete_id == athlete.id
-    ).first()
-    if w:
-        fields = _parse_workout_form(sport, workout_date, distance_m,
-                                     duration_min, calories, athlete.weight_kg)
-        for k, v in fields.items():
-            setattr(w, k, v)
-        w.notes = notes or None
-        db.commit()
-    return RedirectResponse(url="/treinos", status_code=303)
+def edit_workout_disabled(request: Request, workout_id: int):
+    # Edição manual de treino desativada — os dados vêm do Strava.
+    return RedirectResponse(url=f"/treino/{workout_id}", status_code=303)
 
 
 @app.get("/treino/{workout_id}", response_class=HTMLResponse)
@@ -2393,48 +2353,10 @@ def _insert_parsed_workouts(db: Session, athlete: Athlete, parsed_list):
     return inserted, skipped_dup, by_sport
 
 
-@app.get("/importar/garmin", response_class=HTMLResponse)
-def garmin_import_page(request: Request, db: Session = Depends(get_db)):
-    athlete = get_active_athlete(request, db)
-    return templates.TemplateResponse(
-        "import_garmin.html",
-        {
-            "request": request,
-            "athlete": athlete,
-            "athletes": get_all_athletes(db),
-            "result": None,
-        },
-    )
-
-
-@app.post("/importar/garmin", response_class=HTMLResponse)
-async def garmin_import_upload(
-    request: Request, file: UploadFile = File(...), db: Session = Depends(get_db),
-):
-    athlete = get_active_athlete(request, db)
-    content = await file.read()
-    ctx = {"request": request, "athlete": athlete, "athletes": get_all_athletes(db)}
-
-    if len(content) > 25 * 1024 * 1024:  # 25 MB
-        ctx["result"] = {"error": "Arquivo maior que 25 MB. Suba o summarizedActivities.json."}
-        return templates.TemplateResponse("import_garmin.html", ctx)
-
-    from garmin_import import parse_garmin_json
-    parsed = parse_garmin_json(content)
-    if not parsed.ok or parsed.total_rows == 0:
-        ctx["result"] = {
-            "error": ("Não consegui ler as atividades. Confirme que é o arquivo "
-                      "summarizedActivities.json do export da Garmin (não o .zip inteiro)."),
-        }
-        return templates.TemplateResponse("import_garmin.html", ctx)
-
-    inserted, skipped_dup, by_sport = _insert_parsed_workouts(db, athlete, parsed.parsed)
-    ctx["result"] = {
-        "ok": True, "filename": file.filename, "total_rows": parsed.total_rows,
-        "inserted": inserted, "skipped_dup": skipped_dup,
-        "skipped_bad": parsed.skipped_bad_row, "by_sport": by_sport,
-    }
-    return templates.TemplateResponse("import_garmin.html", ctx)
+@app.get("/importar/garmin")
+def garmin_import_page(request: Request):
+    # Importação por Garmin desativada — só Strava. Redireciona para a conexão.
+    return RedirectResponse(url="/importar", status_code=303)
 
 
 def _import_ctx(request, athlete, db, result=None, strava_result=None, strava_error=None):
