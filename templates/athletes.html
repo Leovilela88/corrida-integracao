@@ -6,17 +6,6 @@
         <h1 class="page-title">Meu perfil</h1>
         <p class="page-sub">Seus dados pessoais e de conta.</p>
     </div>
-    {% if db_dialect == 'postgresql' %}
-    <span class="db-badge db-ok" title="Postgres está conectado: dados persistem entre deploys">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-        Postgres (persistente)
-    </span>
-    {% else %}
-    <span class="db-badge db-warn" title="SQLite efêmero: os dados somem a cada deploy. Conecte o Postgres no Railway.">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
-        SQLite (efêmero — dados somem no deploy)
-    </span>
-    {% endif %}
 </header>
 
 {% set a = athlete %}
@@ -52,33 +41,11 @@
         </div>
         {% endif %}
 
-        {% set imc = bmi(a.weight_kg, a.height_cm) %}
-        {% if imc %}
-        <div class="imc-row">
-            <span class="imc-label">IMC</span>
-            <span class="imc-value">{{ "%.1f"|format(imc) }}</span>
-            <span class="imc-cat imc-{{ bmi_category(imc)|replace(' ', '-') }}">{{ bmi_category(imc) }}</span>
-        </div>
-        {% endif %}
         <form method="post" action="/atletas/{{ a.id }}/edit" class="form-inline">
             <div class="row">
                 <label>
                     <span>Nome</span>
                     <input type="text" name="name" value="{{ a.name }}" required maxlength="80" />
-                </label>
-                <label>
-                    <span>Peso (kg)</span>
-                    <input type="number" step="0.1" min="20" max="250" name="weight_kg" value="{{ "%.1f"|format(a.weight_kg) }}" required />
-                </label>
-            </div>
-            <div class="row">
-                <label>
-                    <span>Altura (cm)</span>
-                    <input type="number" step="0.1" min="80" max="250" name="height_cm" value="{{ "%.1f"|format(a.height_cm) if a.height_cm else '' }}" placeholder="opcional" />
-                </label>
-                <label>
-                    <span>Idade</span>
-                    <input type="number" step="1" min="5" max="120" name="age" value="{{ a.age or '' }}" placeholder="opcional" />
                 </label>
                 <label>
                     <span>Sexo</span>
@@ -93,7 +60,7 @@
                 <span>E-mail <em>(para recuperar a senha)</em></span>
                 <input type="email" name="email" maxlength="120" value="{{ a.email or '' }}" autocapitalize="none" autocorrect="off" placeholder="voce@email.com" />
             </label>
-            <p class="hint">Apenas o <strong>peso</strong> entra no cálculo de calorias (<code>MET × peso × horas</code>). O <strong>e-mail</strong> serve para recuperar sua senha. Altura, idade e sexo ficam guardados para IMC.</p>
+            <p class="hint">O <strong>e-mail</strong> serve para recuperar sua senha.</p>
             <div class="actions">
                 <button type="submit" class="btn-primary btn-small">Salvar alterações</button>
             </div>

@@ -2167,7 +2167,7 @@ def athletes_edit(
     request: Request,
     aid: int,
     name: str = Form(...),
-    weight_kg: str = Form(...),
+    weight_kg: Optional[str] = Form(None),
     height_cm: Optional[str] = Form(None),
     age: Optional[str] = Form(None),
     sex: Optional[str] = Form(None),

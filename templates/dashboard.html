@@ -200,29 +200,6 @@
         </div>
     </div>
     {% endfor %}
-    {% if pace_run or pace_swim %}
-    <div class="compare-box">
-        <div class="compare-head">Evolução do ritmo <span class="compare-sub">mês vs anterior</span></div>
-        <div class="compare-rows">
-            {% if pace_run %}
-            <div class="compare-row">
-                <span class="compare-metric"><span class="record-ico" style="color:#60a5fa">{{ bicon('run') }}</span> {{ pace_run.cur }}</span>
-                {% if pace_run.faster %}<span class="delta delta-up">▲ {{ pace_run.pct|abs }}% + rápido</span>
-                {% elif pace_run.pct > 0 %}<span class="delta delta-down">▼ {{ pace_run.pct }}% + lento</span>
-                {% else %}<span class="delta delta-flat">igual</span>{% endif %}
-            </div>
-            {% endif %}
-            {% if pace_swim %}
-            <div class="compare-row">
-                <span class="compare-metric"><span class="record-ico" style="color:#22d3ee">{{ bicon('waves') }}</span> {{ pace_swim.cur }}</span>
-                {% if pace_swim.faster %}<span class="delta delta-up">▲ {{ pace_swim.pct|abs }}% + rápido</span>
-                {% elif pace_swim.pct > 0 %}<span class="delta delta-down">▼ {{ pace_swim.pct }}% + lento</span>
-                {% else %}<span class="delta delta-flat">igual</span>{% endif %}
-            </div>
-            {% endif %}
-        </div>
-    </div>
-    {% endif %}
 </section>
 
 {# --- Desafios --- #}
