@@ -2368,6 +2368,12 @@ def _insert_parsed_workouts(db: Session, athlete: Athlete, parsed_list):
                 w.route_polyline = poly
             if extra_json and not w.extra_json:
                 w.extra_json = extra_json
+            elif extra and extra.get("strava_id"):
+                # treino já tinha métricas mas não o id do Strava: mescla p/ o link "Ver no Strava"
+                cur = _from_json(w.extra_json) or {}
+                if not cur.get("strava_id"):
+                    cur["strava_id"] = extra["strava_id"]
+                    w.extra_json = json.dumps(cur)
             continue
         cal = pw.calories
         if cal is None:

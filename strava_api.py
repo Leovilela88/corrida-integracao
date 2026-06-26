@@ -144,10 +144,14 @@ def _to_workout(act: dict) -> Optional[ParsedWorkout]:
         cal = act.get("calories")
         name = act.get("name")
         poly = (act.get("map") or {}).get("summary_polyline") or None
+        # guarda o id da atividade no Strava p/ o link "Ver no Strava" (exigência de marca)
+        extra = _extra_metrics(act) or {}
+        if act.get("id"):
+            extra["strava_id"] = act["id"]
         return ParsedWorkout(
             date=d, sport="corrida", distance_km=dist_km,
             duration_min=dur_min, calories=cal, notes=(name or None),
-            polyline=poly, extra=_extra_metrics(act),
+            polyline=poly, extra=(extra or None),
         )
     except Exception:
         return None

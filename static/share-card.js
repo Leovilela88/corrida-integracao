@@ -187,6 +187,10 @@
     const spLogo = new Image(); spLogo.crossOrigin = 'anonymous'; let spReady = false;
     spLogo.onload = () => { spReady = true; if (overlay && !overlay.hidden) render(); };
     spLogo.src = '/static/logo_covabra.png';
+    // Logo oficial "Powered by Strava" — obrigatório em imagens que exibem dados do Strava
+    const stravaLogo = new Image(); stravaLogo.crossOrigin = 'anonymous'; let stravaReady = false;
+    stravaLogo.onload = () => { stravaReady = true; if (overlay && !overlay.hidden) render(); };
+    stravaLogo.src = '/static/strava_powered_white.png';
 
     // Garante que a Brinova (fonte oficial) esteja carregada antes de desenhar no canvas.
     if (document.fonts) {
@@ -723,6 +727,12 @@
         const logosBaseline = fb - 46;             // base dos logos
         const labelY = logosBaseline - logoH - 10; // rótulos acima
         const colL = W * 0.31, colR = W * 0.69;
+
+        // "Powered by Strava" centralizado acima dos rótulos (atribuição obrigatória)
+        if (stravaReady) {
+            const sH = 26, sW = sH * (stravaLogo.width / stravaLogo.height);
+            ctx.drawImage(stravaLogo, cx - sW / 2, labelY - 30 - sH, sW, sH);
+        }
 
         ctx.fillStyle = 'rgba(255,255,255,0.55)';
         ctx.font = '700 15px Brinova, Inter, sans-serif';

@@ -13,6 +13,12 @@
             Compartilhar
         </button>
         {% endif %}
+        {% if extra and extra.strava_id %}
+        <a href="https://www.strava.com/activities/{{ extra.strava_id }}" target="_blank" rel="noopener" class="btn-strava-view">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.4 16.97 13.7 13.6h-2.6l4.3 8.4 4.3-8.4h-2.6m-7.3-3.4 2.4-4.7 2.4 4.7h-3.5L9.6 6.6 5.3 15h2.8"/></svg>
+            Ver no Strava
+        </a>
+        {% endif %}
         <a href="/treino/{{ w.id }}/editar" class="btn-ghost btn-small">Editar treino</a>
     </div>
 </header>
@@ -208,5 +214,9 @@
 </script>
 {% else %}
 <a href="/treinos" class="btn-ghost">Voltar aos treinos</a>
+{% endif %}
+
+{% if extra and extra.strava_id %}
+<p class="strava-powered" style="text-align:center;"><img src="/static/strava_powered_white.png" alt="Powered by Strava" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'strava-powered-txt',textContent:'Powered by Strava'}))" /></p>
 {% endif %}
 {% endblock %}

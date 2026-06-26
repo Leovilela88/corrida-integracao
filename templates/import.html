@@ -41,9 +41,15 @@
         </div>
         {% else %}
         <p class="hint" style="margin:0 0 12px;">Conecte sua conta e traga os treinos automaticamente, sem exportar arquivo nenhum.</p>
-        <a href="/strava/conectar" class="btn-strava">Conectar com o Strava</a>
+        <a href="/strava/conectar" class="strava-connect-btn" aria-label="Conectar com o Strava">
+            <img src="/static/strava_connect.png" alt="Connect with Strava"
+                 onerror="this.style.display='none';this.insertAdjacentHTML('afterend','&lt;span class=&quot;btn-strava&quot;&gt;Conectar com o Strava&lt;/span&gt;')" />
+        </a>
         {% endif %}
-        <p class="strava-powered">Powered by Strava</p>
+        <p class="strava-powered">
+            <img src="/static/strava_powered_white.png" alt="Powered by Strava"
+                 onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'strava-powered-txt',textContent:'Powered by Strava'}))" />
+        </p>
     </div>
 </section>
 {% else %}

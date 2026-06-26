@@ -2342,6 +2342,14 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
     transition: filter .15s;
 }
 .btn-strava:hover { filter: brightness(1.08); }
+/* Link "Ver no Strava" (deep-link de volta à atividade) */
+.btn-strava-view {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #fc4c02; color: #fff; text-decoration: none;
+    border-radius: 8px; padding: 8px 14px; font-size: 0.85rem; font-weight: 700;
+    transition: filter .15s;
+}
+.btn-strava-view:hover { filter: brightness(1.08); }
 /* Botão principal do Strava (header do dashboard) — destaque com glow */
 .page-header-actions {
     display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
@@ -2363,7 +2371,15 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
 }
 .strava-dot { width: 10px; height: 10px; border-radius: 50%; background: #fc4c02; box-shadow: 0 0 8px #fc4c02; }
 .strava-actions { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; }
-.strava-powered { color: var(--muted); font-size: 0.72rem; letter-spacing: 0.5px; margin: 14px 0 0; text-transform: uppercase; }
+/* Botão oficial "Connect with Strava" (arte da marca, não pode ser recolorida) */
+.strava-connect-btn { display: inline-block; line-height: 0; transition: filter .15s; }
+.strava-connect-btn:hover { filter: brightness(1.06); }
+.strava-connect-btn img { height: 48px; width: auto; display: block; }
+/* Logo oficial "Powered by Strava" — usado em toda superfície que exibe dados do Strava */
+.strava-powered { margin: 16px 0 0; line-height: 0; }
+.strava-powered img { height: 18px; width: auto; display: inline-block; opacity: 0.95; }
+/* fallback de texto enquanto o logo oficial não está em static/ */
+.strava-powered-txt { color: var(--muted); font-size: 0.72rem; letter-spacing: 0.5px; text-transform: uppercase; }
 .or-divider {
     display: flex; align-items: center; gap: 12px;
     color: var(--muted); font-size: 0.85rem; margin: 22px 0;
