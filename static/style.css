@@ -2377,8 +2377,8 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
 .strava-connect-btn img { height: 48px; width: auto; display: block; }
 /* Logo oficial "Powered by Strava" — usado em toda superfície que exibe dados do Strava */
 .strava-powered { margin: 16px 0 0; line-height: 0; }
-.strava-powered img { height: 18px; width: auto; display: inline-block; opacity: 0.95; }
-.strava-powered .strava-compatible { height: 22px; margin-left: 14px; }
+.strava-powered img { height: 28px; width: auto; display: inline-block; opacity: 0.95; }
+.strava-powered .strava-compatible { height: 32px; margin-left: 16px; }
 /* fallback de texto enquanto o logo oficial não está em static/ */
 .strava-powered-txt { color: var(--muted); font-size: 0.72rem; letter-spacing: 0.5px; text-transform: uppercase; }
 .or-divider {
