@@ -679,12 +679,13 @@
             ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
         }
 
-        // degradê azul: transparente em cima -> escuro embaixo
+        // degradê azul: transparente em cima -> escuro embaixo (feather longo e suave)
         const og = ctx.createLinearGradient(0, 0, 0, H);
         og.addColorStop(0.00, 'rgba(8,14,32,0)');
-        og.addColorStop(0.42, 'rgba(8,14,32,0.12)');
-        og.addColorStop(0.62, 'rgba(9,17,42,0.74)');
-        og.addColorStop(1.00, 'rgba(4,7,15,0.99)');
+        og.addColorStop(0.45, 'rgba(8,14,32,0)');
+        og.addColorStop(0.68, 'rgba(8,13,30,0.13)');
+        og.addColorStop(0.84, 'rgba(7,11,24,0.45)');
+        og.addColorStop(1.00, 'rgba(4,7,15,0.90)');
         ctx.fillStyle = og; ctx.fillRect(0, 0, W, H);
 
         // degradê no topo (escuro descendo) — bem sutil, só um leve apoio à regressiva
@@ -699,7 +700,7 @@
         const glow = ctx.createRadialGradient(cx, gy, 40, cx, gy, 660);
         glow.addColorStop(0, color + '22');
         glow.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = glow; ctx.fillRect(0, H * 0.52, W, H * 0.48);
+        ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
 
         // cabeçalho do topo: regressiva (treino/resumo) ou "FINISHER" (medalha)
         if (payload.type === 'workout' || payload.type === 'period') drawCountdownTop(cx);
