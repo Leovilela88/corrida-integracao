@@ -809,16 +809,24 @@ def go_inscricao(request: Request, db: Session = Depends(get_db)):
     return RedirectResponse(url=url, status_code=302)
 
 
+_ADMIN_PERIODS = [("24h", "24 horas", 1), ("7d", "7 dias", 7),
+                  ("30d", "30 dias", 30), ("tudo", "Tudo", None)]
+
+
 @app.get("/admin", response_class=HTMLResponse)
 def admin_page(request: Request, db: Session = Depends(get_db),
+               periodo: str = "7d",
                reset_name: Optional[str] = None, reset_pwd: Optional[str] = None):
     me = get_active_athlete(request, db)
     if not me.is_admin:
         raise HTTPException(status_code=403)
+    # período escolhido para a contagem de cliques (default 7 dias)
+    sel = next((p for p in _ADMIN_PERIODS if p[0] == periodo), _ADMIN_PERIODS[1])
     insc_clicks = db.query(LinkClick).filter(LinkClick.kind == "inscricao").count()
-    insc_clicks_7d = db.query(LinkClick).filter(
-        LinkClick.kind == "inscricao",
-        LinkClick.created_at >= now_br() - timedelta(days=7)).count()
+    cq = db.query(LinkClick).filter(LinkClick.kind == "inscricao")
+    if sel[2] is not None:
+        cq = cq.filter(LinkClick.created_at >= now_br() - timedelta(days=sel[2]))
+    insc_clicks_period = cq.count()
     accounts = (
         db.query(Athlete).filter(Athlete.password_hash.isnot(None))
         .order_by(Athlete.created_at.desc().nullslast(), Athlete.id.desc()).all()
@@ -832,7 +840,8 @@ def admin_page(request: Request, db: Session = Depends(get_db),
         {
             "request": request, "athlete": me, "accounts": accounts,
             "total": len(accounts), "online": online, "active_24h": active_24h,
-            "insc_clicks": insc_clicks, "insc_clicks_7d": insc_clicks_7d,
+            "insc_clicks": insc_clicks, "insc_clicks_period": insc_clicks_period,
+            "periodos": _ADMIN_PERIODS, "periodo_sel": sel[0], "periodo_label": sel[1],
             "reset_name": reset_name, "reset_pwd": reset_pwd,
         },
     )
