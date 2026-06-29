@@ -27,6 +27,9 @@ def send_email(to: str, subject: str, html: str, text: str = "") -> bool:
     """Envia um e-mail. Retorna True se enviou, False se não há SMTP configurado
     ou se falhou (sem nunca levantar exceção para o caller)."""
     if not is_configured():
+        missing = [k for k in ("SMTP_HOST", "SMTP_USER", "SMTP_PASS", "MAIL_FROM")
+                   if not os.environ.get(k)]
+        print(f"[emailer] SMTP nao configurado; faltam variaveis: {missing}", flush=True)
         return False
     host = os.environ["SMTP_HOST"]
     port = int(os.environ.get("SMTP_PORT", "587"))
@@ -53,8 +56,10 @@ def send_email(to: str, subject: str, html: str, text: str = "") -> bool:
                 s.starttls(context=ssl.create_default_context())
                 s.login(user, pwd)
                 s.send_message(msg)
+        print(f"[emailer] enviado para {to} via {host}:{port}", flush=True)
         return True
-    except Exception:
+    except Exception as e:
+        print(f"[emailer] FALHA SMTP ({host}:{port}, user={user}): {e!r}", flush=True)
         return False
 
 
