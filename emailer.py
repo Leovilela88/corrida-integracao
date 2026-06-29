@@ -39,7 +39,14 @@ def _send_via_resend_api(sender: str, from_name: str, to: str, subject: str,
     }).encode("utf-8")
     req = urllib.request.Request(
         "https://api.resend.com/emails", data=payload, method="POST",
-        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            # UA explícito: o User-Agent padrão do urllib é bloqueado pelo
+            # bot-protection do Cloudflare na frente da API (erro 1010).
+            "User-Agent": "corrida-integracao/1.0 (+https://app.corridaintegracao.app.br)",
+            "Accept": "application/json",
+        },
     )
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
