@@ -10,7 +10,8 @@
     // Data da prova (abertura 5K, sábado) — base da regressiva no card
     const RACE_TARGET = new Date('2026-09-26T07:00:00-03:00').getTime();
     function daysToRace() {
-        return Math.max(0, Math.ceil((RACE_TARGET - Date.now()) / 86400000));
+        // mesmo cálculo da regressiva do dashboard (floor), pra não desencontrar 1 dia
+        return Math.max(0, Math.floor((RACE_TARGET - Date.now()) / 86400000));
     }
 
     // ---------------------------------------------------------------- estado
@@ -686,10 +687,10 @@
         og.addColorStop(1.00, 'rgba(4,7,15,0.99)');
         ctx.fillStyle = og; ctx.fillRect(0, 0, W, H);
 
-        // degradê no topo (escuro descendo) — dá leitura na regressiva
+        // degradê no topo (escuro descendo) — bem sutil, só um leve apoio à regressiva
         const tg = ctx.createLinearGradient(0, 0, 0, H * 0.42);
-        tg.addColorStop(0.00, 'rgba(4,7,15,0.92)');
-        tg.addColorStop(0.32, 'rgba(6,12,28,0.50)');
+        tg.addColorStop(0.00, 'rgba(4,7,15,0.40)');
+        tg.addColorStop(0.32, 'rgba(6,12,28,0.14)');
         tg.addColorStop(1.00, 'rgba(8,14,32,0)');
         ctx.fillStyle = tg; ctx.fillRect(0, 0, W, H * 0.42);
 
