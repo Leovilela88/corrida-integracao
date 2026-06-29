@@ -13,14 +13,45 @@ provedor — Brevo, Resend, Gmail, etc.):
 Enquanto não estiver configurado, `is_configured()` é False e o app apenas
 registra o link no log (dá pra testar o fluxo sem enviar de verdade).
 """
+import json
 import os
 import smtplib
 import ssl
+import urllib.error
+import urllib.request
 from email.message import EmailMessage
 
 
 def is_configured() -> bool:
     return all(os.environ.get(k) for k in ("SMTP_HOST", "SMTP_USER", "SMTP_PASS", "MAIL_FROM"))
+
+
+def _send_via_resend_api(sender: str, from_name: str, to: str, subject: str,
+                         html: str, text: str, api_key: str) -> bool:
+    """Envia pela API HTTP do Resend (porta 443). O Railway bloqueia SMTP de
+    saída, então este é o caminho confiável quando SMTP_HOST é o Resend."""
+    payload = json.dumps({
+        "from": f"{from_name} <{sender}>",
+        "to": [to],
+        "subject": subject,
+        "html": html,
+        "text": text or "Abra este e-mail em um cliente compatível com HTML.",
+    }).encode("utf-8")
+    req = urllib.request.Request(
+        "https://api.resend.com/emails", data=payload, method="POST",
+        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            print(f"[emailer] enviado para {to} via Resend API (HTTP {resp.status})", flush=True)
+            return True
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", "replace")[:300]
+        print(f"[emailer] FALHA Resend API (HTTP {e.code}): {body}", flush=True)
+        return False
+    except Exception as e:
+        print(f"[emailer] FALHA Resend API: {e!r}", flush=True)
+        return False
 
 
 def send_email(to: str, subject: str, html: str, text: str = "") -> bool:
@@ -37,6 +68,10 @@ def send_email(to: str, subject: str, html: str, text: str = "") -> bool:
     pwd = os.environ["SMTP_PASS"]
     sender = os.environ["MAIL_FROM"]
     from_name = os.environ.get("MAIL_FROM_NAME", "Corrida Integração")
+
+    # Resend: usa a API HTTP (porta 443), pois o Railway bloqueia SMTP de saída.
+    if host.endswith("resend.com"):
+        return _send_via_resend_api(sender, from_name, to, subject, html, text, pwd)
 
     msg = EmailMessage()
     msg["Subject"] = subject
