@@ -166,3 +166,13 @@ class Settings(Base):
 
     id = Column(Integer, primary_key=True)
     weight_kg = Column(Float, nullable=False, default=82.0)
+
+
+class LinkClick(Base):
+    """Registra cliques em links de saída (ex.: botão de inscrição)."""
+    __tablename__ = "link_clicks"
+
+    id = Column(Integer, primary_key=True)
+    kind = Column(String(32), nullable=False, index=True)   # ex.: 'inscricao'
+    athlete_id = Column(Integer, ForeignKey("athletes.id"), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())

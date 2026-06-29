@@ -28,8 +28,8 @@ from calories import estimate_calories
 from db import Base, SessionLocal, engine, get_db
 from metrics import bmi, bmi_category, pace, sport_label, workout_share
 from models import (Athlete, ChallengeJoin, ExerciseEntry, Friendship, Goal,
-                    Notification, Race, Routine, RoutineItem, Settings,
-                    WeightLog, Workout)
+                    LinkClick, Notification, Race, Routine, RoutineItem,
+                    Settings, WeightLog, Workout)
 from strava_import import parse_strava_csv
 import achievements
 import auth
@@ -792,12 +792,33 @@ def friend_profile(request: Request, aid: int, db: Session = Depends(get_db)):
 
 # ------------- admin -------------
 
+INSCRICAO_URL = ("https://www.ticketsports.com.br/e/41%C2%AA+CORRIDA+INTEGRA"
+                 "%C3%87%C3%83O+CAMPINAS+-+2026-74224")
+
+
+@app.get("/ir/inscricao")
+def go_inscricao(request: Request, db: Session = Depends(get_db)):
+    """Conta o clique no botão de inscrição e redireciona pro TicketSports (com UTM)."""
+    athlete = get_active_athlete(request, db)
+    try:
+        db.add(LinkClick(kind="inscricao", athlete_id=athlete.id))
+        db.commit()
+    except Exception:
+        db.rollback()  # contar não pode quebrar o redirect
+    url = INSCRICAO_URL + "?utm_source=app&utm_medium=app_corrida&utm_campaign=inscricao_2026"
+    return RedirectResponse(url=url, status_code=302)
+
+
 @app.get("/admin", response_class=HTMLResponse)
 def admin_page(request: Request, db: Session = Depends(get_db),
                reset_name: Optional[str] = None, reset_pwd: Optional[str] = None):
     me = get_active_athlete(request, db)
     if not me.is_admin:
         raise HTTPException(status_code=403)
+    insc_clicks = db.query(LinkClick).filter(LinkClick.kind == "inscricao").count()
+    insc_clicks_7d = db.query(LinkClick).filter(
+        LinkClick.kind == "inscricao",
+        LinkClick.created_at >= now_br() - timedelta(days=7)).count()
     accounts = (
         db.query(Athlete).filter(Athlete.password_hash.isnot(None))
         .order_by(Athlete.created_at.desc().nullslast(), Athlete.id.desc()).all()
@@ -811,6 +832,7 @@ def admin_page(request: Request, db: Session = Depends(get_db),
         {
             "request": request, "athlete": me, "accounts": accounts,
             "total": len(accounts), "online": online, "active_24h": active_24h,
+            "insc_clicks": insc_clicks, "insc_clicks_7d": insc_clicks_7d,
             "reset_name": reset_name, "reset_pwd": reset_pwd,
         },
     )
