@@ -2375,6 +2375,9 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
 .strava-connect-btn { display: inline-block; line-height: 0; transition: filter .15s; }
 .strava-connect-btn:hover { filter: brightness(1.06); }
 .strava-connect-btn img { height: 48px; width: auto; display: block; }
+/* botão oficial dentro do menu de configurações (engrenagem) */
+.dropdown-strava { justify-content: center; padding: 10px 12px; }
+.dropdown-strava img { height: 34px; width: auto; max-width: 100%; display: block; }
 /* Logo oficial "Powered by Strava" — usado em toda superfície que exibe dados do Strava */
 .strava-powered { margin: 16px 0 0; line-height: 0; }
 .strava-powered img { height: 28px; width: auto; display: inline-block; opacity: 0.95; }
