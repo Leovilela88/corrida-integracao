@@ -2039,6 +2039,9 @@ def training_plan_page(request: Request, dist: str = "10K",
 def medals_page(request: Request, db: Session = Depends(get_db)):
     """Medalhas finisher (5K/10K/21K) a partir das corridas do atleta."""
     athlete = get_active_athlete(request, db)
+    # por enquanto, medalhas só para admin (preview); liberar geral após a prova
+    if not athlete.is_admin:
+        return RedirectResponse(url="/", status_code=303)
     medals = stats.finisher_medals(db, athlete.id)
     # payload pronto pro card de compartilhamento (medalha)
     for med in medals:
