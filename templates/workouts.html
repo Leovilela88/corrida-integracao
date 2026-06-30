@@ -6,9 +6,9 @@
         <h1 class="page-title">Atividades</h1>
         <p class="page-sub"><strong>{{ total }}</strong> atividade{{ 's' if total != 1 else '' }} de <strong>{{ athlete.name }}</strong>{% if sport %} · filtrando {{ sport_label(sport) }}{% endif %}</p>
     </div>
-    <a href="/importar" class="btn-primary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-        <span class="nav-label">Importar do Strava</span>
+    <a href="/importar" class="strava-connect-btn" aria-label="Conectar com o Strava">
+        <img src="/static/strava_connect.png" alt="Connect with Strava"
+             onerror="this.style.display='none';this.insertAdjacentHTML('afterend','&lt;span class=&quot;btn-strava&quot;&gt;Importar do Strava&lt;/span&gt;')" />
     </a>
 </header>
 
