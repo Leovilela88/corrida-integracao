@@ -27,9 +27,9 @@ except ImportError:  # Pillow é opcional — sem ele, fotos são salvas sem res
 from calories import estimate_calories
 from db import Base, SessionLocal, engine, get_db
 from metrics import bmi, bmi_category, pace, sport_label, workout_share
-from models import (Athlete, ChallengeJoin, ExerciseEntry, Friendship, Goal,
-                    LinkClick, Notification, Race, Routine, RoutineItem,
-                    Settings, WeightLog, Workout)
+from models import (Activation, Athlete, ChallengeJoin, ExerciseEntry,
+                    Friendship, Goal, LinkClick, Notification, Race, Routine,
+                    RoutineItem, Settings, WeightLog, Workout)
 from strava_import import parse_strava_csv
 import achievements
 import auth
@@ -827,6 +827,7 @@ def admin_page(request: Request, db: Session = Depends(get_db),
     if sel[2] is not None:
         cq = cq.filter(LinkClick.created_at >= now_br() - timedelta(days=sel[2]))
     insc_clicks_period = cq.count()
+    activations = db.query(Activation).order_by(Activation.date.asc(), Activation.id.asc()).all()
     accounts = (
         db.query(Athlete).filter(Athlete.password_hash.isnot(None))
         .order_by(Athlete.created_at.desc().nullslast(), Athlete.id.desc()).all()
@@ -842,9 +843,47 @@ def admin_page(request: Request, db: Session = Depends(get_db),
             "total": len(accounts), "online": online, "active_24h": active_24h,
             "insc_clicks": insc_clicks, "insc_clicks_period": insc_clicks_period,
             "periodos": _ADMIN_PERIODS, "periodo_sel": sel[0], "periodo_label": sel[1],
+            "activations": activations, "today": today_br(),
             "reset_name": reset_name, "reset_pwd": reset_pwd,
         },
     )
+
+
+@app.post("/admin/ativacao")
+def admin_activation_add(
+    request: Request,
+    date_str: str = Form(...),
+    title: str = Form(...),
+    info: Optional[str] = Form(None),
+    location: Optional[str] = Form(None),
+    db: Session = Depends(get_db),
+):
+    me = get_active_athlete(request, db)
+    if not me.is_admin:
+        raise HTTPException(status_code=403)
+    try:
+        d = date.fromisoformat(date_str.strip())
+    except (ValueError, AttributeError):
+        return RedirectResponse(url="/admin", status_code=303)
+    title = (title or "").strip()[:120]
+    if d and title:
+        db.add(Activation(date=d, title=title,
+                          info=(info or "").strip()[:2000] or None,
+                          location=(location or "").strip()[:160] or None))
+        db.commit()
+    return RedirectResponse(url="/admin", status_code=303)
+
+
+@app.post("/admin/ativacao/{act_id}/delete")
+def admin_activation_delete(request: Request, act_id: int, db: Session = Depends(get_db)):
+    me = get_active_athlete(request, db)
+    if not me.is_admin:
+        raise HTTPException(status_code=403)
+    a = db.query(Activation).filter(Activation.id == act_id).first()
+    if a:
+        db.delete(a)
+        db.commit()
+    return RedirectResponse(url="/admin", status_code=303)
 
 
 @app.post("/admin/{aid}/redefinir-senha")
@@ -1097,6 +1136,11 @@ def dashboard(
     )
     goals_progress = [stats.goal_progress(db, athlete.id, g, today) for g in goals]
     calendars = stats.monthly_calendars(db, athlete.id, today, months=1)
+    # ações de ativação futuras (próximas), marcadas pelo admin
+    activations = (
+        db.query(Activation).filter(Activation.date >= today)
+        .order_by(Activation.date.asc(), Activation.id.asc()).limit(6).all()
+    )
     badges = achievements.evaluate(db, athlete.id)
     # desafios aceitos (mostra as barras enchendo no dashboard)
     _ch_joins = db.query(ChallengeJoin).filter(ChallengeJoin.athlete_id == athlete.id).all()
@@ -1162,6 +1206,7 @@ def dashboard(
             "records": records,
             "goals_progress": goals_progress,
             "calendars": calendars,
+            "activations": activations,
             "badges": badges,
             "pace_run": pace_run,
             "pace_swim": pace_swim,

@@ -176,3 +176,15 @@ class LinkClick(Base):
     kind = Column(String(32), nullable=False, index=True)   # ex.: 'inscricao'
     athlete_id = Column(Integer, ForeignKey("athletes.id"), nullable=True)
     created_at = Column(DateTime, server_default=func.now())
+
+
+class Activation(Base):
+    """Ações de ativação marcadas no calendário geral (gerenciadas pelo admin)."""
+    __tablename__ = "activations"
+
+    id = Column(Integer, primary_key=True)
+    date = Column(Date, nullable=False, index=True)
+    title = Column(String(120), nullable=False)
+    info = Column(Text, nullable=True)
+    location = Column(String(160), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())

@@ -29,6 +29,58 @@
     {% endfor %}
 </div>
 
+<section class="recent" style="margin-bottom: 24px;">
+    <div class="section-head"><h2>Ações de ativação</h2></div>
+    <p class="hint" style="margin:-6px 0 14px;">Marque as datas em destaque no calendário geral (visível a todos).</p>
+
+    <form method="post" action="/admin/ativacao" class="form-inline" style="margin-bottom:18px;">
+        <div class="row">
+            <label><span>Data</span>
+                <input type="date" name="date_str" required />
+            </label>
+            <label><span>Título</span>
+                <input type="text" name="title" required maxlength="120" placeholder="ex: Retirada de kits" />
+            </label>
+        </div>
+        <label><span>Local <em>(opcional)</em></span>
+            <input type="text" name="location" maxlength="160" placeholder="ex: Parque Portugal — Lagoa do Taquaral" />
+        </label>
+        <label><span>Informações <em>(opcional)</em></span>
+            <textarea name="info" rows="3" maxlength="2000" placeholder="Detalhes da ação, horário, instruções…"></textarea>
+        </label>
+        <div class="actions">
+            <button type="submit" class="btn-primary btn-small">+ Adicionar ação</button>
+        </div>
+    </form>
+
+    {% if activations %}
+    <div class="table-wrap">
+        <table class="tbl">
+            <thead><tr><th>Data</th><th>Título</th><th>Local</th><th>Informações</th><th></th></tr></thead>
+            <tbody>
+            {% for a in activations %}
+            <tr {% if a.date < today %}style="opacity:.55"{% endif %}>
+                <td><strong>{{ a.date.strftime('%d/%m/%Y') }}</strong></td>
+                <td>{{ a.title }}</td>
+                <td>{{ a.location or '—' }}</td>
+                <td>{{ a.info or '—' }}</td>
+                <td class="row-actions">
+                    <form method="post" action="/admin/ativacao/{{ a.id }}/delete" onsubmit="return confirm('Excluir esta ação?');">
+                        <button class="btn-icon" type="submit" title="Excluir">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty">Nenhuma ação cadastrada ainda.</p>
+    {% endif %}
+</section>
+
 <section class="recent">
     <div class="section-head"><h2>Usuários</h2></div>
     <div class="table-wrap">

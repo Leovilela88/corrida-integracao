@@ -25,6 +25,27 @@
     </div>
 </section>
 
+{% if activations %}
+<section class="panel-section">
+    <div class="section-head"><h2>Ações de ativação</h2></div>
+    <div class="activation-list">
+        {% for a in activations %}
+        <div class="activation-item">
+            <div class="activation-date">
+                <span class="activation-day">{{ a.date.strftime('%d') }}</span>
+                <span class="activation-mon">{{ a.date.strftime('%b')|upper }}</span>
+            </div>
+            <div class="activation-body">
+                <div class="activation-title">{{ a.title }}</div>
+                {% if a.location %}<div class="activation-loc">📍 {{ a.location }}</div>{% endif %}
+                {% if a.info %}<div class="activation-info">{{ a.info }}</div>{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
 {% if strava_configured and not strava_connected %}
 <section class="onboard-card">
     <div class="onboard-icon">
