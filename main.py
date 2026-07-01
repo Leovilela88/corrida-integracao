@@ -1186,11 +1186,15 @@ def dashboard(
         _PERIOD_PHRASE.get(range_key, ""),
     )
 
-    # Evento marcado no calendário: próximo domingo (weekday 6)
-    cal_event = {
-        "date": (today + timedelta(days=(6 - today.weekday()) % 7)).isoformat(),
-        "msg": "Integramóvel estará na Lagoa do Taquaral! Nos vemos lá! 🏃",
-    }
+    # Datas destacadas no calendário = ações de ativação cadastradas pelo admin
+    cal_events = {}
+    for a in db.query(Activation).all():
+        msg = a.title
+        if a.location:
+            msg += " · 📍 " + a.location
+        if a.info:
+            msg += " — " + a.info
+        cal_events[a.date.isoformat()] = msg
 
     return templates.TemplateResponse(
         "dashboard.html",
@@ -1199,7 +1203,7 @@ def dashboard(
             "athlete": athlete,
             "athletes": get_all_athletes(db),
             "totals": totals,
-            "cal_event": cal_event,
+            "cal_events": cal_events,
             "share_period": share_period,
             "streak": streak,
             "has_any_workout": has_any_workout,

@@ -366,9 +366,9 @@
                 {% for week in month.weeks %}
                 {% for cell in week %}
                 {% if cell %}
-                {% if cell.iso == cal_event.date %}
+                {% if cell.iso in cal_events %}
                 <button type="button" class="cal-day cal-event {% if cell.is_today %}cal-today{% endif %}"
-                        data-event-msg="{{ cal_event.msg }}" data-event-date="{{ cell.iso }}"
+                        data-event-msg="{{ cal_events[cell.iso] }}" data-event-date="{{ cell.iso }}"
                         title="Evento — toque para ver">{{ cell.day }}<span class="cal-event-ico">!</span></button>
                 {% elif cell.count %}
                 <button type="button" class="cal-day cal-l{{ cell.level }} cal-has {% if cell.is_today %}cal-today{% endif %}"
