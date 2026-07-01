@@ -2120,6 +2120,8 @@ a.btn-icon:hover { color: var(--accent); background: rgba(59, 130, 246, 0.10); }
 .profile-head { display: flex; align-items: center; gap: 14px; }
 .rank-name-link { color: inherit; text-decoration: none; }
 .rank-name-link:hover { color: var(--accent); text-decoration: underline; }
+.rank-avatar-link { display: flex; flex-shrink: 0; line-height: 0; border-radius: 50%; transition: opacity .15s; }
+.rank-avatar-link:hover { opacity: 0.85; }
 
 /* disputa de provas */
 .race-dispute {

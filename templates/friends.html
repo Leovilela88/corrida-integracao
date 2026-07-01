@@ -99,10 +99,10 @@
     <div class="friend-list">
         {% for r in received %}
         <div class="friend-row">
-            <span class="friend-name">
+            <a class="friend-name friend-link" href="/amigo/{{ r.athlete.id }}">
                 {% if r.athlete.photo_mime %}<img class="avatar avatar-xs" src="/atletas/{{ r.athlete.id }}/foto" alt="" />{% endif %}
                 {{ r.athlete.name }}
-            </span>
+            </a>
             <span class="friend-req-actions">
                 <form method="post" action="/amigos/{{ r.fid }}/aceitar">
                     <button type="submit" class="btn-primary btn-small">Aceitar</button>
@@ -123,10 +123,10 @@
     <div class="friend-list">
         {% for s in sent %}
         <div class="friend-row">
-            <span class="friend-name">
+            <a class="friend-name friend-link" href="/amigo/{{ s.athlete.id }}">
                 {% if s.athlete.photo_mime %}<img class="avatar avatar-xs" src="/atletas/{{ s.athlete.id }}/foto" alt="" />{% endif %}
                 {{ s.athlete.name }}
-            </span>
+            </a>
             <span class="hint" style="margin:0;">aguardando…</span>
         </div>
         {% endfor %}

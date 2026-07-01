@@ -752,8 +752,13 @@ def notifications_page(request: Request, db: Session = Depends(get_db)):
 @app.get("/amigo/{aid}", response_class=HTMLResponse)
 def friend_profile(request: Request, aid: int, db: Session = Depends(get_db)):
     me = get_active_athlete(request, db)
-    # só dá pra ver o perfil de amigos aceitos
-    if aid == me.id or aid not in friend_ids(db, me.id):
+    # dá pra ver o perfil de quem tem qualquer relação com você (amigo aceito
+    # ou pedido pendente, em qualquer direção)
+    related = db.query(Friendship).filter(
+        ((Friendship.athlete_id == me.id) & (Friendship.friend_id == aid)) |
+        ((Friendship.athlete_id == aid) & (Friendship.friend_id == me.id))
+    ).first()
+    if aid == me.id or not related:
         raise HTTPException(status_code=403)
     friend = db.query(Athlete).filter(Athlete.id == aid).first()
     if not friend:

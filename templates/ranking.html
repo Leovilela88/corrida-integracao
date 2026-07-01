@@ -17,11 +17,13 @@
     {% for r in rows %}
     <article class="rank-card {% if r.pos == 1 and r.km > 0 %}rank-leader{% endif %} {% if r.athlete.id == athlete.id %}rank-me{% endif %}">
         <div class="rank-pos rank-pos-{{ r.pos if r.pos <= 3 else 'n' }}">{{ r.pos }}º</div>
+        {% if r.athlete.id != athlete.id %}<a href="/amigo/{{ r.athlete.id }}" class="rank-avatar-link" aria-label="Ver perfil de {{ r.athlete.name }}">{% endif %}
         {% if r.athlete.photo_mime %}
         <img class="avatar avatar-lg" src="/atletas/{{ r.athlete.id }}/foto" alt="{{ r.athlete.name }}" />
         {% else %}
         <span class="avatar avatar-lg avatar-placeholder">{{ r.athlete.name[:1]|upper }}</span>
         {% endif %}
+        {% if r.athlete.id != athlete.id %}</a>{% endif %}
         <div class="rank-body">
             <div class="rank-name">
                 {% if r.athlete.id == athlete.id %}{{ r.athlete.name }} <span class="rank-you">você</span>
