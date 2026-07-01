@@ -187,4 +187,5 @@ class Activation(Base):
     title = Column(String(120), nullable=False)
     info = Column(Text, nullable=True)
     location = Column(String(160), nullable=True)
+    cal_text = Column(String(200), nullable=True)   # texto curto exibido no calendário
     created_at = Column(DateTime, server_default=func.now())

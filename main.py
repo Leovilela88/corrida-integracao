@@ -120,6 +120,13 @@ def _init_db() -> None:
             if "strava_last_sync_at" not in cols:
                 conn.execute(text("ALTER TABLE athletes ADD COLUMN strava_last_sync_at TIMESTAMP"))
 
+    # Coluna cal_text em activations (texto curto que aparece no calendário).
+    if "activations" in insp.get_table_names():
+        cols = {c["name"] for c in insp.get_columns("activations")}
+        if "cal_text" not in cols:
+            with engine.begin() as conn:
+                conn.execute(text("ALTER TABLE activations ADD COLUMN cal_text VARCHAR(200)"))
+
     # Coluna dispute_id em races (disputa entre amigos).
     if "races" in insp.get_table_names():
         rcols = {c["name"] for c in insp.get_columns("races")}
@@ -861,6 +868,7 @@ def admin_activation_add(
     title: str = Form(...),
     info: Optional[str] = Form(None),
     location: Optional[str] = Form(None),
+    cal_text: Optional[str] = Form(None),
     db: Session = Depends(get_db),
 ):
     me = get_active_athlete(request, db)
@@ -874,7 +882,8 @@ def admin_activation_add(
     if d and title:
         db.add(Activation(date=d, title=title,
                           info=(info or "").strip()[:2000] or None,
-                          location=(location or "").strip()[:160] or None))
+                          location=(location or "").strip()[:160] or None,
+                          cal_text=(cal_text or "").strip()[:200] or None))
         db.commit()
     return RedirectResponse(url="/admin", status_code=303)
 
@@ -1186,15 +1195,11 @@ def dashboard(
         _PERIOD_PHRASE.get(range_key, ""),
     )
 
-    # Datas destacadas no calendário = ações de ativação cadastradas pelo admin
+    # Datas destacadas no calendário = ações de ativação cadastradas pelo admin.
+    # Mostra o "texto no calendário" (curto) se preenchido; senão, o título.
     cal_events = {}
     for a in db.query(Activation).all():
-        msg = a.title
-        if a.location:
-            msg += " · 📍 " + a.location
-        if a.info:
-            msg += " — " + a.info
-        cal_events[a.date.isoformat()] = msg
+        cal_events[a.date.isoformat()] = a.cal_text or a.title
 
     return templates.TemplateResponse(
         "dashboard.html",
