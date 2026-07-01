@@ -5,9 +5,15 @@
 <header class="page-header">
     <div>
         <h1 class="page-title">Ranking</h1>
-        <p class="page-sub">Placar de <strong>{{ month_label }}</strong> · ordenado por distância</p>
+        <p class="page-sub">Placar de <strong>{{ period_label }}</strong> · ordenado por distância</p>
     </div>
 </header>
+
+<div class="period-tabs" style="display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap;">
+    {% for key, label in periodos %}
+    <a href="/ranking?periodo={{ key }}" class="btn-small {{ 'btn-primary' if periodo_sel == key else 'btn-ghost' }}">{{ label }}</a>
+    {% endfor %}
+</div>
 
 {% if rows|length < 2 %}
 <p class="empty">O ranking fica mais divertido com 2+ atletas. <a href="/atletas">Adicionar atleta</a> →</p>

@@ -342,9 +342,11 @@ def monthly_calendars(db: Session, athlete_id: int, today: date, months: int = 3
 
 # ------------- ranking entre atletas -------------
 
-def ranking(db: Session, athletes: list, today: date) -> list[dict]:
-    """Placar do mês corrente (até hoje) por atleta."""
-    start, end = month_bounds(today)
+def ranking(db: Session, athletes: list, today: date,
+            start: date = None, end: date = None) -> list[dict]:
+    """Placar por atleta no período (padrão: mês corrente até hoje)."""
+    if start is None or end is None:
+        start, end = month_bounds(today)
     out = []
     for a in athletes:
         agg = _aggregate(db, a.id, start, end)

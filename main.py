@@ -2020,13 +2020,27 @@ def race_delete(request: Request, race_id: int, db: Session = Depends(get_db)):
 
 # ------------- ranking & conquistas -------------
 
+_RANKING_PERIODS = [("semana", "Semana"), ("mes", "Mês"), ("3meses", "3 meses")]
+
+
 @app.get("/ranking", response_class=HTMLResponse)
-def ranking_page(request: Request, db: Session = Depends(get_db)):
+def ranking_page(request: Request, periodo: str = "mes", db: Session = Depends(get_db)):
     athlete = get_active_athlete(request, db)
     ids = friend_ids(db, athlete.id)
     athletes = db.query(Athlete).filter(Athlete.id.in_(ids)).all()
     today = today_br()
-    rows = stats.ranking(db, athletes, today)
+    if periodo not in dict(_RANKING_PERIODS):
+        periodo = "mes"
+    if periodo == "semana":
+        start, end = stats.week_bounds(today)
+        period_label = "Esta semana"
+    elif periodo == "3meses":
+        start, end = today - timedelta(days=90), today
+        period_label = "Últimos 3 meses"
+    else:
+        start, end = stats.month_bounds(today)
+        period_label = today.strftime("%B de %Y")
+    rows = stats.ranking(db, athletes, today, start, end)
     return templates.TemplateResponse(
         "ranking.html",
         {
@@ -2034,7 +2048,9 @@ def ranking_page(request: Request, db: Session = Depends(get_db)):
             "athlete": athlete,
             "athletes": athletes,
             "rows": rows,
-            "month_label": today.strftime("%B de %Y"),
+            "periodos": _RANKING_PERIODS,
+            "periodo_sel": periodo,
+            "period_label": period_label,
             "solo": len(athletes) <= 1,
         },
     )
