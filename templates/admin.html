@@ -94,6 +94,7 @@
             <tr>
                 <th>Nome</th>
                 <th>Usuário</th>
+                <th>Strava</th>
                 <th>Código</th>
                 <th>Admin</th>
                 <th>Criada em</th>
@@ -106,6 +107,7 @@
             <tr>
                 <td><strong>{{ a.name }}</strong></td>
                 <td>{{ a.username or "—" }}</td>
+                <td>{% if a.strava_access_token %}<span style="color:#fc4c02; font-weight:700;">● conectado</span>{% else %}<span style="color:var(--muted-2);">—</span>{% endif %}</td>
                 <td>{{ a.friend_code or "—" }}</td>
                 <td>{{ "sim" if a.is_admin else "—" }}</td>
                 <td>{{ a.created_at.strftime('%d/%m/%y') if a.created_at else "—" }}</td>
