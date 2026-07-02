@@ -823,6 +823,8 @@ def go_inscricao(request: Request, db: Session = Depends(get_db)):
 
 _ADMIN_PERIODS = [("24h", "24 horas", 1), ("7d", "7 dias", 7),
                   ("30d", "30 dias", 30), ("tudo", "Tudo", None)]
+# Cota de atletas liberada pela API do Strava (atualizar quando aumentarem).
+STRAVA_ATHLETE_CAP = int(os.environ.get("STRAVA_ATHLETE_CAP", "1000"))
 
 
 @app.get("/admin", response_class=HTMLResponse)
@@ -839,6 +841,8 @@ def admin_page(request: Request, db: Session = Depends(get_db),
     if sel[2] is not None:
         cq = cq.filter(LinkClick.created_at >= now_br() - timedelta(days=sel[2]))
     insc_clicks_period = cq.count()
+    strava_connected = db.query(Athlete).filter(
+        Athlete.strava_access_token.isnot(None)).count()
     activations = db.query(Activation).order_by(Activation.date.asc(), Activation.id.asc()).all()
     accounts = (
         db.query(Athlete).filter(Athlete.password_hash.isnot(None))
@@ -854,6 +858,7 @@ def admin_page(request: Request, db: Session = Depends(get_db),
             "request": request, "athlete": me, "accounts": accounts,
             "total": len(accounts), "online": online, "active_24h": active_24h,
             "insc_clicks": insc_clicks, "insc_clicks_period": insc_clicks_period,
+            "strava_connected": strava_connected, "strava_cap": STRAVA_ATHLETE_CAP,
             "periodos": _ADMIN_PERIODS, "periodo_sel": sel[0], "periodo_label": sel[1],
             "activations": activations, "today": today_br(),
             "reset_name": reset_name, "reset_pwd": reset_pwd,
